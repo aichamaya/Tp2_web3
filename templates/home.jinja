@@ -1,0 +1,64 @@
+{% extends "base.jinja" %}
+{% block title %}Accueil{% endblock %}
+{% block contenu %}
+<div class="row g-3 align-items-stretch mb-3">
+  <div class="col-lg-7">
+    <div class="p-4 bg-white border rounded-3 h-100 hero hover-up">
+      <h1 class="display-6">Trouvez ou offrez des services sportifs</h1>
+      <p class="text-muted">
+        Coaching, sparring, préparation physique, séances de récupération, location de matériel… près de chez vous.
+      </p>
+      <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="/publish">Proposer un service sportif</a>
+        <a class="btn btn-outline-primary" href="/services">Explorer les offres sport</a>
+
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <img class="img-fluid rounded-3 h-100 object-fit-cover" src="/static/img/default_service.png" alt="Sport">
+
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="p-3 bg-white border rounded-3 h-100">
+      <h2 class="h6 mb-1">Coachs & partenaires</h2>
+      <p class="text-muted small mb-0">Trouve un coach, un binôme d’entraînement, ou propose tes compétences.</p>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="p-3 bg-white border rounded-3 h-100">
+      <h2 class="h6 mb-1">Matériel & logistique</h2>
+      <p class="text-muted small mb-0">Location de matériel, cordage, entretien vélo, déplacement pour matchs.</p>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="p-3 bg-white border rounded-3 h-100">
+      <h2 class="h6 mb-1">Bien-être & récup</h2>
+      <p class="text-muted small mb-0">Massage sportif, étirements guidés, mobilité, nutrition sportive.</p>
+    </div>
+  </div>
+</div>
+
+<h2 class="h5 mb-3">Derniers services actifs</h2>
+<div class="row g-3">
+  {% for s in services %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <img class="card-img-top" src="/static/img/default_service.png" alt="Sport">
+      <div class="card-body">
+        <h5 class="card-title mb-1">{{ s.titre }}</h5>
+        <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
+        <a class="stretched-link" href="/services/detail?service_id={{ s.id_service }}"></a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p class="text-muted">Aucun service actif pour l’instant. <a href="/publish">Publier le premier</a> !</p>
+  {% endfor %}
+</div>
+
+
+{% endblock %}

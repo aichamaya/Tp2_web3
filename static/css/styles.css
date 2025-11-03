@@ -1,0 +1,41 @@
+/* Palette sport (accent vert) */
+:root {
+  --sport: #0F172A;
+}
+
+.navbar.bg-primary {
+  background-color: var(--sport) !important;
+}
+
+.btn-primary {
+  background-color: var(--sport);
+  border-color: var(--sport);
+}
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+/* cartes + hero */
+.hero {
+  border-radius: 0.75rem;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.hover-up {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.hover-up:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.75rem 1.25rem rgba(0, 0, 0, 0.08);
+}
+
+/* images responsives */
+.card-img-top {
+  max-height: 180px;
+  -o-object-fit: cover;
+     object-fit: cover;
+}/*# sourceMappingURL=styles.css.map */

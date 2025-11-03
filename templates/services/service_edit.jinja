@@ -1,0 +1,99 @@
+{% extends "base.jinja" %}
+{% block title %}Éditer un service{% endblock %}
+
+{% block contenu %}
+<h1 class="h3 mb-3">Éditer le service</h1>
+<form method="post" action="/services/edit" novalidate>
+<input type="hidden" name="service_id" value="{{ s.id_service }}">
+  <div class="row g-3">
+
+  
+    <div class="col-md-6">
+      <label class="form-label">Titre</label>
+      <input
+        class="form-control {{ 'is-invalid' if errors.get('titre') }}"
+        name="titre"
+        maxlength="50"
+        value="{{ form.titre or s.titre }}"
+      >
+      {% if errors.get('titre') %}
+        <div class="form-error">{{ errors['titre'] }}</div>
+      {% endif %}
+    </div>
+
+    
+    <div class="col-md-6">
+      <label class="form-label">Catégorie (non modifiable)</label>
+      <input class="form-control" value="{{ s.nom_categorie }}" disabled>
+    </div>
+
+    
+    <div class="col-md-6">
+      <label class="form-label">Localisation</label>
+      <input
+        class="form-control {{ 'is-invalid' if errors.get('localisation') }}"
+        name="localisation"
+        maxlength="50"
+        value="{{ form.localisation or s.localisation }}"
+      >
+      {% if errors.get('localisation') %}
+        <div class="form-error">{{ errors['localisation'] }}</div>
+      {% endif %}
+    </div>
+
+   
+    <div class="col-md-6">
+      <label class="form-label">Coût</label>
+      <input
+        class="form-control {{ 'is-invalid' if errors.get('cout') }}"
+        type="number"
+        name="cout"
+        step="0.01"
+        min="0"
+        value="{{ form.cout if form.cout is not none else s.cout }}"
+      >
+      {% if errors.get('cout') %}
+        <div class="form-error">{{ errors['cout'] }}</div>
+      {% endif %}
+    </div>
+
+    
+    <div class="col-12">
+      <label class="form-label">Description</label>
+      <textarea
+        class="form-control {{ 'is-invalid' if errors.get('description') }}"
+        name="description"
+        rows="4"
+      >{{ form.description or s.description }}</textarea>
+      {% if errors.get('description') %}
+        <div class="form-error">{{ errors['description'] }}</div>
+      {% endif %}
+    </div>
+
+   
+  <div class="col-md-4">
+  <label class="form-label d-block mb-1">Statut</label>
+  {% set actif_val = (form.actif if form.actif is defined else ('1' if s.actif != 0 else '0')) %}
+
+  <div class="form-check">
+    <input class="form-check-input" type="radio" name="actif" id="actif1" value="1"
+           {% if actif_val|string == '1' %}checked{% endif %}>
+    <label class="form-check-label" for="actif1">Actif</label>
+  </div>
+
+  <div class="form-check">
+    <input class="form-check-input" type="radio" name="actif" id="actif0" value="0"
+           {% if actif_val|string == '0' %}checked{% endif %}>
+    <label class="form-check-label" for="actif0">Inactif</label>
+  </div>
+</div>
+
+    <div class="col-12">
+      <button class="btn btn-primary">Enregistrer</button>
+      <a class="btn btn-outline-secondary" href="/services/detail?service_id={{ s.id_service }}">Annuler</a>
+
+    </div>
+
+  </div>
+</form>
+{% endblock %}

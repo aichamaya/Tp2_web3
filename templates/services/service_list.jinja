@@ -1,0 +1,45 @@
+{% extends "base.jinja" %}
+{% block title %}Tous les services{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-3">Tous les services</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4">
+  <!-- formulaire de filtre facultatif -->
+    <input class="form-control" name="q" value="{{ request.args.get('q','') }}" placeholder="Rechercher…">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="categorie">
+      <option value="">Catégorie</option>
+      {% for c in categories %}
+        <option value="{{ c.id_categorie }}" {{ 'selected' if request.args.get('categorie')==(c.id_categorie|string) else '' }}>
+          {{ c.nom_categorie }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <input class="form-control" name="localisation" value="{{ request.args.get('localisation','') }}" placeholder="Ville">
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-primary w-100">Filtrer</button>
+  </div>
+</form>
+
+<div class="row g-3">
+  {% for s in services %}
+  <div class="col-md-4">
+    <div class="card h-100">
+       <img class="card-img-top" src="/static/img/default_service.png" alt="">
+      <div class="card-body">
+        <h5 class="card-title mb-1">{{ s.titre }}</h5>
+        <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
+        <a class="stretched-link" href="/services/detail?service_id={{ s.id_service }}"></a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+    <p class="text-muted">Aucun service trouvé.</p>
+  {% endfor %}
+</div>
+{% endblock %}

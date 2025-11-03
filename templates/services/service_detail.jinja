@@ -1,0 +1,25 @@
+{% extends "base.jinja" %}
+{% block title %}Détails{% endblock %}
+
+{% block contenu %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <img class="img-fluid rounded" src="/static/img/default_service.png" alt="Sport">
+  </div>
+  <div class="col-lg-5">
+    <h1 class="h4">{{ s.titre }}</h1>
+    <p class="text-muted mb-1"><span class="badge text-bg-light">{{ s.nom_categorie }}</span></p>
+    <p class="text-muted">{{ s.localisation }}</p>
+    <p>{{ s.description }}</p>
+    <ul class="list-unstyled">
+      <li><strong>Coût :</strong> {{ 'Gratuit' if (s.cout or 0) == 0 else (s.cout) }}</li>
+      <li><strong>Date d’ajout :</strong> {{ s.date_creation }}</li>
+      <li><strong>Statut :</strong> {{ 'Actif' if s.actif==1 else 'Inactif' }}</li>
+    </ul>
+
+    <a class="btn btn-primary" href="/services/edit?service_id={{ s.id_service }}">Modifier</a>
+    <a class="btn btn-outline-secondary" href="/services">Retour</a>
+
+  </div>
+</div>
+{% endblock %}

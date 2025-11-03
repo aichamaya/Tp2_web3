@@ -1,0 +1,49 @@
+{% extends "base.jinja" %}
+{% block title %}Ajouter un service{% endblock %}
+{% block contenu %}
+<h1 class="h3 mb-3">Ajouter un service</h1>
+<form method="post" action="/publish" novalidate>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Titre</label>
+      <input class="form-control {{ 'is-invalid' if errors.get('titre') }}" name="titre" maxlength="50" value="{{ form.titre or '' }}">
+      {% if errors.get('titre') %}<div class="form-error">{{ errors['titre'] }}</div>{% endif %}
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Catégorie</label>
+      <select class="form-select {{ 'is-invalid' if errors.get('id_categorie') }}" name="id_categorie">
+        <option value="">Choisir...</option>
+        {% for c in categories %}
+          <option value="{{ c.id_categorie }}" {{ 'selected' if (form.id_categorie|string)==(c.id_categorie|string) else '' }}>{{ c.nom_categorie }}</option>
+        {% endfor %}
+      </select>
+      {% if errors.get('id_categorie') %}<div class="form-error">{{ errors['id_categorie'] }}</div>{% endif %}
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Localisation</label>
+      <input class="form-control {{ 'is-invalid' if errors.get('localisation') }}" name="localisation" maxlength="50" value="{{ form.localisation or '' }}">
+      {% if errors.get('localisation') %}<div class="form-error">{{ errors['localisation'] }}</div>{% endif %}
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Coût</label>
+      <input class="form-control {{ 'is-invalid' if errors.get('cout') }}" type="number" name="cout" step="0.01" min="0" value="{{ form.cout if form.cout is not none else 0 }}">
+      {% if errors.get('cout') %}<div class="form-error">{{ errors['cout'] }}</div>{% endif %}
+    </div>
+    <div class="col-12">
+      <label class="form-label">Description</label>
+      <textarea class="form-control {{ 'is-invalid' if errors.get('description') }}" name="description" rows="4">{{ form.description or '' }}</textarea>
+      {% if errors.get('description') %}<div class="form-error">{{ errors['description'] }}</div>{% endif %}
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Statut</label>
+      <select class="form-select" name="actif">
+        <option value="1" {{ 'selected' if (form.actif|string)!='0' else '' }}>Actif</option>
+        <option value="0" {{ 'selected' if (form.actif|string)=='0' else '' }}>Inactif</option>
+      </select>
+    </div>
+    <div class="col-12">
+      <button class="btn btn-primary">Publier</button>
+    </div>
+  </div>
+</form>
+{% endblock %}
