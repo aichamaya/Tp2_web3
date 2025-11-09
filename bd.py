@@ -6,8 +6,8 @@ import mysql.connector
 def creer_connexion():
     """Crée une connexion MySQL et commit/rollback automatiquement."""
     conn = mysql.connector.connect(
-        user="garneau",
-        password="qwerty_123",
+        user="root",
+        password="Maya2016",
         host="127.0.0.1",
         database="services_particuliers",
         raise_on_warnings=True,

@@ -75,7 +75,7 @@ def supprimer_compte(user_id):
             flash(f"Le compte utilisateur ID:{user_id} a été supprimé par l'administrateur.", "success")
             
     except Exception: 
-    flash("Erreur lors de la suppression du compte.", "danger")
+        flash("Erreur lors de la suppression du compte.", "danger")
         
     return redirect(url_for("service.home")) 
 
