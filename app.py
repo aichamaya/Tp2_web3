@@ -12,6 +12,7 @@ babel = Babel(app)
 
 @app.before_request
 def load_user():
+    """utilisateur"""
     g.user = None
     if session.get("id_utilisateur"):
         g.user = {
