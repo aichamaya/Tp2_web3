@@ -5,21 +5,22 @@
 
 <form class="row g-2 mb-3" method="get">
   <div class="col-md-4">
-  <!-- formulaire de filtre facultatif -->
     <input class="form-control" name="q" value="{{ request.args.get('q','') }}" placeholder="Rechercher…">
   </div>
   <div class="col-md-3">
     <select class="form-select" name="categorie">
       <option value="">Catégorie</option>
       {% for c in categories %}
-        <option value="{{ c.id_categorie }}" {{ 'selected' if request.args.get('categorie')==(c.id_categorie|string) else '' }}>
-          {{ c.nom_categorie }}
-        </option>
+      <option value="{{ c.id_categorie }}" {{ 'selected' if request.args.get('categorie')==(c.id_categorie|string)
+        else '' }}>
+        {{ c.nom_categorie }}
+      </option>
       {% endfor %}
     </select>
   </div>
   <div class="col-md-3">
-    <input class="form-control" name="localisation" value="{{ request.args.get('localisation','') }}" placeholder="Ville">
+    <input class="form-control" name="localisation" value="{{ request.args.get('localisation','') }}"
+      placeholder="Ville">
   </div>
   <div class="col-md-2">
     <button class="btn btn-primary w-100">Filtrer</button>
@@ -30,16 +31,19 @@
   {% for s in services %}
   <div class="col-md-4">
     <div class="card h-100">
-       <img class="card-img-top" src="/static/img/default_service.png" alt="">
+      {# LOGIQUE IMAGE #}
+      {% set image_src = url_for('static', filename='images/' + s.nom_image) if s.nom_image else url_for('static',
+      filename='img/default_service.png') %}
+      <img class="card-img-top object-fit-cover" style="height: 200px;" src="{{ image_src }}" alt="{{ s.titre }}">
       <div class="card-body">
         <h5 class="card-title mb-1">{{ s.titre }}</h5>
         <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
-        <a class="stretched-link" href="/services/detail?service_id={{ s.id_service }}"></a>
+        <a class="stretched-link" href="{{ url_for('service.service_detail_qs', service_id=s.id_service) }}"></a>
       </div>
     </div>
   </div>
   {% else %}
-    <p class="text-muted">Aucun service trouvé.</p>
+  <p class="text-muted">Aucun service trouvé.</p>
   {% endfor %}
 </div>
 {% endblock %}

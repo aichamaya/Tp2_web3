@@ -1,0 +1,76 @@
+
+{% extends "base.jinja" %}
+{% block title %}Mes Réservations{% endblock %}
+{% block contenu %}
+<h1 class="h3 mb-4">Mes Réservations</h1>
+
+<ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="faites-tab" data-bs-toggle="tab" data-bs-target="#faites" type="button" role="tab" aria-controls="faites" aria-selected="true">
+        Réservations faites par moi ({{ reservations_faites|length }})
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="recues-tab" data-bs-toggle="tab" data-bs-target="#recues" type="button" role="tab" aria-controls="recues" aria-selected="false">
+        Réservations reçues ({{ reservations_recues|length }})
+    </button>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="faites" role="tabpanel" aria-labelledby="faites-tab">
+    {% if reservations_faites %}
+    <div class="row row-cols-1 g-3">
+        {% for r in reservations_faites %}
+        <div class="col">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <h5 class="card-title">{{ r.titre }} <span class="badge bg-secondary ms-2">{{ r.cout_paye_formatte }}</span></h5>
+                    <p class="card-text mb-1">
+                        <i class="bi bi-calendar-day me-1"></i> Date souhaitée : <strong>{{ r.date_souhaitee_formattee }}</strong>
+                    </p>
+                    <p class="card-text mb-1">
+                        <i class="bi bi-person-fill me-1"></i> Fournisseur : {{ r.courriel_proprietaire }}
+                    </p>
+                    <p class="card-text small text-muted">
+                        Réservé le : {{ r.date_reservation_formattee }}
+                    </p>
+                    <a href="{{ url_for('service.service_detail_qs', service_id=r.id_service) }}" class="stretched-link">Voir le service</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">Vous n'avez effectué aucune réservation pour l'instant.</div>
+    {% endif %}
+  </div>
+  <div class="tab-pane fade" id="recues" role="tabpanel" aria-labelledby="recues-tab">
+    {% if reservations_recues %}
+    <div class="row row-cols-1 g-3">
+        {% for r in reservations_recues %}
+        <div class="col">
+            <div class="card shadow-sm border-success">
+                <div class="card-body">
+                    <h5 class="card-title">{{ r.titre }} <span class="badge bg-success ms-2">{{ r.cout_paye_formatte }} gagné</span></h5>
+                    <p class="card-text mb-1">
+                        <i class="bi bi-calendar-day me-1"></i> Date souhaitée : <strong>{{ r.date_souhaitee_formattee }}</strong>
+                    </p>
+                    <p class="card-text mb-1">
+                        <i class="bi bi-person-fill me-1"></i> Réservé par : {{ r.courriel_reservant }}
+                    </p>
+                    <p class="card-text small text-muted">
+                        Réservé le : {{ r.date_reservation_formattee }}
+                    </p>
+                    <a href="{{ url_for('service.service_detail_qs', service_id=r.id_service) }}" class="stretched-link">Voir le service</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">Aucune réservation n'a été faite pour vos services.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

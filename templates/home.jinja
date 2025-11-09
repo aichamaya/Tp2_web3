@@ -9,14 +9,15 @@
         Coaching, sparring, préparation physique, séances de récupération, location de matériel… près de chez vous.
       </p>
       <div class="d-flex gap-2">
-        <a class="btn btn-primary" href="/publish">Proposer un service sportif</a>
-        <a class="btn btn-outline-primary" href="/services">Explorer les offres sport</a>
+        <a class="btn btn-primary" href="{{ url_for('service.publish') }}">Proposer un service sportif</a>
+        <a class="btn btn-outline-primary" href="{{ url_for('service.services_list') }}">Explorer les offres sport</a>
 
       </div>
     </div>
   </div>
   <div class="col-lg-5">
-    <img class="img-fluid rounded-3 h-100 object-fit-cover" src="/static/img/default_service.png" alt="Sport">
+    <img class="img-fluid rounded-3 h-100 object-fit-cover"
+      src="{{ url_for('static', filename='img/default_service.png') }}" alt="Sport">
 
   </div>
 </div>
@@ -47,16 +48,20 @@
   {% for s in services %}
   <div class="col-md-4">
     <div class="card h-100">
-      <img class="card-img-top" src="/static/img/default_service.png" alt="Sport">
+      {# LOGIQUE IMAGE #}
+      {% set image_src = url_for('static', filename='images/' + s.nom_image) if s.nom_image else url_for('static',
+      filename='img/default_service.png') %}
+      <img class="card-img-top object-fit-cover" style="height: 200px;" src="{{ image_src }}" alt="{{ s.titre }}">
       <div class="card-body">
         <h5 class="card-title mb-1">{{ s.titre }}</h5>
         <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
-        <a class="stretched-link" href="/services/detail?service_id={{ s.id_service }}"></a>
+        <a class="stretched-link" href="{{ url_for('service.service_detail_qs', service_id=s.id_service) }}"></a>
       </div>
     </div>
   </div>
   {% else %}
-  <p class="text-muted">Aucun service actif pour l’instant. <a href="/publish">Publier le premier</a> !</p>
+  <p class="text-muted">Aucun service actif pour l’instant. <a href="{{ url_for('service.publish') }}">Publier le
+      premier</a> !</p>
   {% endfor %}
 </div>
 
