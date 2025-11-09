@@ -3,7 +3,6 @@ from flask_babel import Babel
 from service import bp as service_bp
 from reservation import bp as reservation_bp
 from compte import bp as compte_bp
-
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "TP_CLE_SECRETE_TRES_SECURITAIRE"
 app.config["BABEL_DEFAULT_LOCALE"] = "fr_CA"
