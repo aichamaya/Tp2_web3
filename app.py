@@ -21,10 +21,9 @@ def load_user():
             "credit": session.get("credit"),
         }
 
-
 app.register_blueprint(service_bp, url_prefix="/")
 app.register_blueprint(reservation_bp, url_prefix="/reservation")
-app.register_blueprint(compte_bp, url_prefix="/comptes")
+app.register_blueprint(compte_bp, url_prefix="/compte")
 
 
 @app.post("/locale")
@@ -43,7 +42,7 @@ def set_locale():
 def e403(_e):
     """Pour les erreurs 403 (Accès Interdit)."""
     return render_template(
-        "erreur.jinja",
+        "erreur/erreur.jinja",
         message="Code 403 : Accès Interdit. Vous n'avez pas la permission d'accéder à cette ressource.",
     ), 403
 
@@ -51,19 +50,19 @@ def e403(_e):
 @app.errorhandler(404)
 def e404(_e):
     """message erreur 404"""
-    return render_template("erreur.jinja", message="code 404: Détails d’un service inexistant"), 404
+    return render_template("erreur/erreur.jinja", message="code 404: Détails d’un service inexistant"), 404
 
 
 @app.errorhandler(400)
 def e400(_e):
     """"message erreur"""
-    return render_template("erreur.jinja", message="code 400: Requête invalide", code="400"), 400
+    return render_template("erreur/erreur.jinja", message="code 400: Requête invalide", code="400"), 400
 
 
 @app.errorhandler(500)
 def e500(_e):
     """message erreur lié à la BD"""
-    return render_template("erreur.jinja", message="code 500: Erreur en lien avec la BD"), 500
+    return render_template("erreur/erreur.jinja", message="code 500: Erreur en lien avec la BD"), 500
 
 
 if __name__ == "__main__":

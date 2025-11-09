@@ -20,31 +20,26 @@ def connexion():
     if request.method == "POST":
         courriel = (request.form.get("courriel") or "").strip()
         mot_de_passe = request.form.get("mot_de_passe", "") 
-
         with bd.creer_connexion() as conn:
-            utilisateur = bd.get_utilisateur_by_courriel(conn, courriel) 
-        
-  
-        if utilisateur and check_password_hash(utilisateur["mot_de_passe"], mot_de_passe):
-           
-            session.clear()
-            session["id_utilisateur"] = utilisateur["id_utilisateur"]
-            session["courriel"] = utilisateur["courriel"]
-            session["role"] = utilisateur["role"]
-            session["credit"] = utilisateur["credit"]
+            utilisateur = bd.verifier_utilisateur(conn,courriel,mot_de_passe)
+            if utilisateur:
+                session["nom"] = utilisateur["nom"]
+                session["prenom"] = utilisateur["prenom"]      
+                session["id_utilisateur"] = utilisateur["id_utilisateur"]
+                session["courriel"] = utilisateur["courriel"]
+                session["role"] = utilisateur["role"]
+                session["credit"] = utilisateur["credit"]
             
-            flash(f"Connexion réussie. Bienvenue, {utilisateur['courriel']}.", "success")
-            return redirect(url_for("service.home"), 302) 
-        else:
-            flash("Courriel ou mot de passe incorrect.", "danger")
-            return render_template("connexion.jinja", form={"courriel": courriel}), 401 
-
-  
-    return render_template("connexion.jinja", form={})
+                flash(f"Connexion réussie. Bienvenue, {utilisateur['courriel']}.", "success")
+                return redirect(url_for("service.home"), 302) 
+            else:
+                flash("Courriel ou mot de passe incorrect.", "danger")
+                return render_template("compte/connexion.jinja")
+    return render_template("compte/connexion.jinja")
 
 @bp.route("/deconnexion")
 def deconnexion():
-    """Gère la déconnexion de l'utilisateur (TACHE ACCOMPLIE)."""
+    """Gère la déconnexion de l'utilisateur ."""
     session.clear() 
     flash("Vous avez été déconnecté.", "info")
     return redirect(url_for("service.home"), 302)

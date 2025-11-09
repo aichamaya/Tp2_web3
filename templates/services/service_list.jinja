@@ -31,10 +31,10 @@
   {% for s in services %}
   <div class="col-md-4">
     <div class="card h-100">
-      {# LOGIQUE IMAGE #}
-      {% set image_src = url_for('static', filename='images/' + s.nom_image) if s.nom_image else url_for('static',
-      filename='img/default_service.png') %}
-      <img class="card-img-top object-fit-cover" style="height: 200px;" src="{{ image_src }}" alt="{{ s.titre }}">
+      
+      {% set images_src = url_for('static', filename='images/' + s.nom_images) if s.nom_images else url_for('static',
+      filename='images/default_service.png') %}
+      <img class="card-img-top object-fit-cover" style="height: 200px;" src="{{ images_src }}" alt="{{ s.titre }}">
       <div class="card-body">
         <h5 class="card-title mb-1">{{ s.titre }}</h5>
         <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>

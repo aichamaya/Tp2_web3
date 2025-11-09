@@ -14,6 +14,8 @@ def home():
     try:
         with bd.creer_connexion() as conn:
             services = bd.get_service_all(conn)
+            if not services:
+                abort(400)
         return render_template("home.jinja", services=services, locale=locale)
     except Exception as e:
         flash(f"Erreur de base de données au chargement de la page d'accueil: {e}", "danger")
@@ -35,7 +37,7 @@ def services_list():
         flash(f"Erreur de base de données lors de la recherche: {e}", "danger")
         cats, rows = [], []
 
-    return render_template("service_list.jinja", services=rows, categories=cats, locale=locale)
+    return render_template("services/service_list.jinja", services=rows, categories=cats, locale=locale)
 
 @bp.route("/services/<int:service_id>")
 def service_detail(service_id: int):

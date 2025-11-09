@@ -25,7 +25,7 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('service.services_list') }}">Tous les services</a>
           </li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('reservation.liste_reservations') }}">Mes
-              Réservations</a></li> {# NOUVEAU LIEN #}
+              Réservations</a></li> 
         </ul>
         <form action="{{ url_for('compte.deconnexion') }}" method="post" class="d-flex align-items-center me-3">
           {% if session.id_utilisateur %}
