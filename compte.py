@@ -4,14 +4,15 @@ from utilitaires.compte.validation_compte import valider_compte
 import hashlib
 import bd 
 
-bp = Blueprint('compte', __name__)
+bp_compte = Blueprint('compte', __name__)
 
 def hacher_mdp(mdp_en_clair):
     """Hache un mot de passe avec SHA-512"""
     return hashlib.sha512(mdp_en_clair.encode('utf-8')).hexdigest()
 
-@bp.route('/inscription', methods=["GET", "POST"])
+@bp_compte.route('/inscription', methods=["GET", "POST"])
 def inscription():
+
     if request.method == "POST":
 
         prenom = request.form.get("prenom", "").strip()
@@ -54,7 +55,7 @@ def inscription():
     )
 
 
-@bp.route("/connexion", methods=["GET", "POST"])
+@bp_compte.route("/connexion", methods=["GET", "POST"])
 def connexion():
     """Gère la connexion de l'utilisateur."""
     
@@ -82,14 +83,14 @@ def connexion():
                 return render_template("compte/connexion.jinja")
     return render_template("compte/connexion.jinja")
 
-@bp.route("/deconnexion")
+@bp_compte.route("/deconnexion")
 def deconnexion():
     """Gère la déconnexion de l'utilisateur ."""
     session.clear() 
     flash("Vous avez été déconnecté.", "info")
     return redirect(url_for("service.home"), 302)
 
-@bp.route("/supprimer/<int:user_id>", methods=["POST"])
+@bp_compte.route("/supprimer/<int:user_id>", methods=["POST"])
 def supprimer_compte(user_id):
     """Suppression du compte."""
    
@@ -119,7 +120,7 @@ def supprimer_compte(user_id):
         
     return redirect(url_for("service.home")) 
 
-@bp.route("/utilisateurs")
+@bp_compte.route("/utilisateurs")
 def liste_utilisateurs():
     if "utilisateur_id" not in session:
         flash("Pour accéder à cette page, veuillez vous connecter à votre compte.", "warning")

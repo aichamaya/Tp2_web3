@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, make_response, sess
 from flask_babel import Babel
 from service import bp_service
 from reservation import bp_reservation
-from compte import bp as compte_bp
+from compte import bp_compte
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "TP_CLE_SECRETE_TRES_SECURITAIRE"
 app.config["BABEL_DEFAULT_LOCALE"] = "fr_CA"
@@ -23,7 +23,7 @@ def load_user():
 
 app.register_blueprint(bp_service, url_prefix="/")
 app.register_blueprint(bp_reservation, url_prefix="/reservation")
-app.register_blueprint(compte_bp, url_prefix="/compte")
+app.register_blueprint(bp_compte, url_prefix="/compte")
 
 @app.route("/")
 def home():

@@ -1,5 +1,5 @@
 import re
-from flask import Blueprint, render_template, request, redirect, abort, flash, current_app, session, url_for, 
+from flask import Blueprint, render_template, request, redirect, abort, flash, current_app, session, url_for,g
 from babel import numbers, dates
 
 import os
@@ -43,10 +43,9 @@ def services_list():
 
     return render_template("services/service_list.jinja", services=rows, categories=cats, locale=locale)
 
-@bp.route("/<int:id_service>/supprimer", methods=["POST", "GET"])
+@bp_service.route("/<int:id_service>/supprimer", methods=["POST", "GET"])
 def supprimer_service(id_service):
-
-    # Vérifie si l'utilisateur est un admin
+    """Vérifie si l'utilisateur est un admin"""
     if not session.get('est_admin', False):
         
         flash("Accès refusé !", "danger")
@@ -60,7 +59,7 @@ def supprimer_service(id_service):
     return redirect(url_for('service.services_list'))
      
 
-@bp.route("/services/<int:service_id>")
+@bp_service.route("/services/<int:service_id>")
 def service_detail(service_id: int):
     """Détail d'un service."""
     locale = request.cookies.get("local", "fr_CA")
