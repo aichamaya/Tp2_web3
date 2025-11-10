@@ -39,6 +39,23 @@ def services_list():
 
     return render_template("services/service_list.jinja", services=rows, categories=cats, locale=locale)
 
+@bp.route("/<int:id_service>/supprimer", methods=["POST", "GET"])
+def supprimer_service(id_service):
+
+    # Vérifie si l'utilisateur est un admin
+    if not session.get('est_admin', False):
+        
+        flash("Accès refusé !", "danger")
+        return redirect(url_for('service.services_list'))
+
+    with bd.creer_connexion() as conn:
+        bd.supprimer_service(conn, id_service)
+
+  
+    flash("Le service a été supprimé !", "success")
+    return redirect(url_for('service.services_list'))
+     
+
 @bp.route("/services/<int:service_id>")
 def service_detail(service_id: int):
     """Détail d'un service."""

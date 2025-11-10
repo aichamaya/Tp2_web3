@@ -210,6 +210,14 @@ def update_service_with_image(conn, service_id, titre, localisation, description
             (titre, description, localisation, actif, cout, nom_image, service_id),
         )
         return curseur.rowcount
+    
+def supprimer_service(conn, id_service):
+    with conn.get_curseur() as curseur:
+        curseur.execute(
+            'DELETE FROM services WHERE id_service = %(id)s',
+            {'id': id_service}
+        )
+    conn.commit() 
 
 
 
