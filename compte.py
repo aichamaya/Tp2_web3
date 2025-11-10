@@ -1,13 +1,58 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort
-from werkzeug.security import check_password_hash
-import bd
-from flask import Blueprint
+from utilitaires.compte.validation_compte import valider_compte
+
+import hashlib
+import bd 
+
 bp = Blueprint('compte', __name__)
 
-@bp.route("/inscription", methods=["GET", "POST"])
+def hacher_mdp(mdp_en_clair):
+    """Hache un mot de passe avec SHA-512"""
+    return hashlib.sha512(mdp_en_clair.encode('utf-8')).hexdigest()
+
+@bp.route('/inscription', methods=["GET", "POST"])
 def inscription():
+    if request.method == "POST":
+
+        prenom = request.form.get("prenom", "").strip()
+        nom = request.form.get("nom", "").strip()
+        courriel = request.form.get("courriel", "").strip()   
+        mot_de_passe = request.form.get("mot_de_passe", "")
+        confirmer_mdp = request.form.get("confirm_mot_de_passe", "")
+
+        erreurs = valider_compte(prenom,nom, courriel, mot_de_passe, confirmer_mdp)
+
+        if not erreurs: 
+            with bd.creer_connexion() as conn:
+                if bd.verifier_utilisateur_existe(conn, courriel):
+                    erreurs["courriel"] = "Ce courriel est déjà utilisé."
+
+        if erreurs:
+            return render_template(
+                "compte/inscription.jinja",
+                titre="Créer un compte",
+                erreurs=erreurs,
+                compte={"prenom": prenom, "nom": nom, "courriel": courriel}
+            ),       
+                    
    
-    return render_template("compte/inscription.jinja")
+        mdp_hache = hacher_mdp(mot_de_passe)
+
+        with bd.creer_connexion() as conn:
+            bd.ajout_utilisateur(
+                conn, prenom,nom,courriel,mdp_hache
+                )
+
+        flash("Compte créé avec succès. Vous pouvez maintenant vous connecter.", "success")    
+        return redirect(url_for('compte.inscription'))
+    
+    return render_template(
+        'compte/creer_compte.jinja',
+        titre="Créer un compte",
+        compte={},
+        erreurs={}
+    )
+
 
 @bp.route("/connexion", methods=["GET", "POST"])
 def connexion():
@@ -21,7 +66,7 @@ def connexion():
         courriel = (request.form.get("courriel") or "").strip()
         mot_de_passe = request.form.get("mot_de_passe", "") 
         with bd.creer_connexion() as conn:
-            utilisateur = bd.verifier_utilisateur(conn,courriel,mot_de_passe)
+            utilisateur = bd.verifier_utilisateur_existe(conn,courriel)
             if utilisateur:
                 session["nom"] = utilisateur["nom"]
                 session["prenom"] = utilisateur["prenom"]      
@@ -74,4 +119,13 @@ def supprimer_compte(user_id):
         
     return redirect(url_for("service.home")) 
 
-
+@bp.route("/utilisateurs")
+def liste_utilisateurs():
+    if "utilisateur_id" not in session:
+        flash("Pour accéder à cette page, veuillez vous connecter à votre compte.", "warning")
+        return redirect(url_for('compte.connexion'))    
+    if session.get("role") != 1:
+        abort(403)
+    with bd.creer_connexion() as conn:
+        utilisateurs = bd.obtenir_les_utilisateurs(conn)
+    return render_template("compte/listeUtilisateur.jinja", utilisateurs=utilisateurs, titre="Utilisateurs")

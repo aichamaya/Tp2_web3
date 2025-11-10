@@ -1,6 +1,10 @@
 import re
-from flask import Blueprint, render_template, request, redirect, abort, flash, session, url_for, g
+from flask import Blueprint, render_template, request, redirect, abort, flash, current_app, session, url_for, 
 from babel import numbers, dates
+
+import os
+import uuid
+from werkzeug.utils import secure_filename
 import bd
 
 bp_service = Blueprint("service", __name__)
@@ -39,8 +43,25 @@ def services_list():
 
     return render_template("services/service_list.jinja", services=rows, categories=cats, locale=locale)
 
-@bp_service.route("/services/<int:service_id>")
-def service_detail(service_id):
+@bp.route("/<int:id_service>/supprimer", methods=["POST", "GET"])
+def supprimer_service(id_service):
+
+    # Vérifie si l'utilisateur est un admin
+    if not session.get('est_admin', False):
+        
+        flash("Accès refusé !", "danger")
+        return redirect(url_for('service.services_list'))
+
+    with bd.creer_connexion() as conn:
+        bd.supprimer_service(conn, id_service)
+
+  
+    flash("Le service a été supprimé !", "success")
+    return redirect(url_for('service.services_list'))
+     
+
+@bp.route("/services/<int:service_id>")
+def service_detail(service_id: int):
     """Détail d'un service."""
     locale = request.cookies.get("local", "fr_CA")
     devise = "USD" if locale == "en_US" else "CAD"
@@ -82,6 +103,8 @@ def publish():
     description = (request.form.get("description") or "").strip()
     id_categorie = request.form.get("id_categorie", type=int)
     actif = 1 if (request.form.get("actif") or "1") == "1" else 0
+    photo = request.files.get('photo')
+
     try:
         cout = float(request.form.get("cout") or 0)
     except ValueError:
@@ -103,14 +126,22 @@ def publish():
             "id_categorie": id_categorie,
             "actif": str(actif),
             "cout": request.form.get("cout", ""),
+            'photo': photo
         }
         return render_template("service_form.jinja", categories=cats, errors=errors, form=form, locale=locale), 400
+    src = None
 
+    nom_photo = "generer-nom-unique.jpg"
+    if photo and photo.filename != '':
+            nom_photo = uuid.uuid4().hex + '_' + secure_filename(photo.filename)
+            chemin = os.path.join(current_app.config['CHEMIN_VERS_AJOUTS'], nom_photo)
+            photo.save(chemin)
+            src = "/" + current_app.config['ROUTE_VERS_AJOUTS'] + "/" + nom_photo
     try:
         with bd.creer_connexion() as conn:
             new_id = bd.ajout_service(conn, id_categorie, titre, description, localisation, actif, cout, id_proprietaire)
     except Exception as e:
-        print(f"Erreur d'ajout de service: {e}")
+        print(f"Erreur lors de l'ajout de service: {e}")
         flash("Erreur lors de l'ajout du service en base de données.", "danger")
         return redirect(url_for(".publish"))
 
