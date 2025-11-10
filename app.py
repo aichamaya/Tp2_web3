@@ -28,7 +28,7 @@ app.register_blueprint(bp_compte, url_prefix="/compte")
 @app.route("/")
 def home():
     """page acceuil"""
-    return redirect(url_for('service.home'))
+    return redirect(url_for('services_listcls'))
 
 
 

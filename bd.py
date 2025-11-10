@@ -58,6 +58,19 @@ def verifier_utilisateur_existe(conn, courriel):
 
     return utilisateur['id_utilisateur'] if utilisateur else None
 
+def authentifier(conn, courriel, mdp):
+    """Retourne un utilisateur avec le courriel et le mdp"""
+    with conn.get_curseur() as curseur:
+        curseur.execute(
+            "SELECT * FROM utilisateur WHERE courriel=%(courriel)s and mdp=%(mdp)s",
+            {
+                "courriel": courriel,
+                "mdp" : mdp
+            }
+        )
+        return curseur.fetchone()
+
+
 
 def ajout_utilisateur(conn, prenom, nom, courriel, mot_de_passe_hache):
     """ajoute un utilisateur"""

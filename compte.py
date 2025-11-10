@@ -45,10 +45,10 @@ def inscription():
                 )
 
         flash("Compte créé avec succès. Vous pouvez maintenant vous connecter.", "success")    
-        return redirect(url_for('compte.inscription'))
+        return redirect(url_for("services_list"))
     
     return render_template(
-        'compte/creer_compte.jinja',
+        'compte/inscription.jinja',
         titre="Créer un compte",
         compte={},
         erreurs={}
@@ -66,18 +66,19 @@ def connexion():
     if request.method == "POST":
         courriel = (request.form.get("courriel") or "").strip()
         mot_de_passe = request.form.get("mot_de_passe", "") 
+        mdp = hacher_mdp(mot_de_passe)
         with bd.creer_connexion() as conn:
-            utilisateur = bd.verifier_utilisateur_existe(conn,courriel)
+            utilisateur = bd.authentifier(conn,courriel,mdp)
             if utilisateur:
                 session["nom"] = utilisateur["nom"]
-                session["prenom"] = utilisateur["prenom"]      
+                session["prenom"] = utilisateur["prenom"]    
                 session["id_utilisateur"] = utilisateur["id_utilisateur"]
                 session["courriel"] = utilisateur["courriel"]
                 session["role"] = utilisateur["role"]
                 session["credit"] = utilisateur["credit"]
             
                 flash(f"Connexion réussie. Bienvenue, {utilisateur['courriel']}.", "success")
-                return redirect(url_for("service.home"), 302) 
+                return redirect(url_for("home"), 302) 
             else:
                 flash("Courriel ou mot de passe incorrect.", "danger")
                 return render_template("compte/connexion.jinja")
