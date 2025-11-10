@@ -40,7 +40,7 @@ def get_curseur(self):
 #     """Prend un mot de passe en clair et lui applique une fonction de hachage"""
 #     return hashlib.sha512(mdp_en_clair.encode('utf-8')).hexdigest()
 
-def verifier_utilisateur(conn, courriel):
+def verifier_utilisateur_existe(conn, courriel):
     """obtenir un utlisateur grâce à son couuriel"""
     with conn.get_curseur() as curseur:
         curseur.execute(
@@ -59,17 +59,29 @@ def verifier_utilisateur(conn, courriel):
     return utilisateur['id_utilisateur'] if utilisateur else None
 
 
-def ajout_utilisateur(conn, courriel: str, mot_de_passe_hache: str):
-    """ajout un utilisateur"""
+def ajout_utilisateur(conn, prenom, nom, courriel, mot_de_passe_hache):
+    """ajoute un utilisateur"""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            INSERT INTO utilisateurs (courriel, mot_de_passe, role, credit)
-            VALUES (%s, %s, 'utilisateur', 0)
+            INSERT INTO utilisateurs (prenom, nom, courriel, mot_de_passe, role, credit)
+            VALUES (
+            %(prenom)s, 
+            %(nom)s, 
+            %(courriel)s, 
+            %(mot_de_passe)s, 
+             0, 0)
             """,
-            (courriel, mot_de_passe_hache),
+            {
+                'prenom': prenom,
+                'nom': nom,
+                'courriel': courriel,
+                'mot_de_passe':  mot_de_passe_hache
+         
+            }
+                
         )
-        return curseur.lastrowid
+   
 
 def supprimer_utilisateur(conn, user_id: int):
     """supprimé un utlisateur"""
