@@ -13,9 +13,9 @@ def inscription():
 def connexion():
     """Gère la connexion de l'utilisateur."""
     
-    if session.get("id_utilisateur"):
-        flash("Vous êtes déjà connecté.", "info")
-        return redirect(url_for("service.home"))
+    # if session.get("id_utilisateur"):
+    #     flash("Vous êtes déjà connecté.", "info")
+    #     return redirect(url_for("service.home"))
 
     if request.method == "POST":
         courriel = (request.form.get("courriel") or "").strip()
@@ -63,11 +63,11 @@ def supprimer_compte(user_id):
         if lignes_supprimees == 0:
             flash("Erreur: Compte non trouvé ou déjà supprimé.", "danger")
             return redirect(url_for("service.home"))     
-        if id_session == user_id:
-            session.clear()
-            flash("Votre compte a été supprimé avec succès. Au revoir.", "success")
+        # if id_session == user_id:
+        #     session.clear()
+        #     flash("Votre compte a été supprimé avec succès. Au revoir.", "success")
         else:
-            flash(f"Le compte utilisateur ID:{user_id} a été supprimé par l'administrateur.", "success")
+            flash(f"Le compte utilisateur ID:{user_id} a été supprimé.", "success")
             
     except Exception: 
         flash("Erreur lors de la suppression du compte.", "danger")

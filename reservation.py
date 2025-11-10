@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from datetime import datetime, date
 from babel import dates, numbers
 import bd
-bp = Blueprint("reservation", __name__) 
+bp_reservation = Blueprint("reservation", __name__) 
 
-@bp.route("/", methods=["GET"])
+@bp_reservation.route("reservation/", methods=["GET"])
 def liste_reservations():
     """Affiche les réservations faites et reçues."""
     if not session.get("id_utilisateur"):
@@ -36,7 +36,7 @@ def liste_reservations():
         locale=locale,
     )
 
-@bp.route("/reserver", methods=["POST"])
+@bp_reservation.route("reservation/reserver", methods=["POST"])
 def reserver_service():
     """Soumettre une réservation."""
     if not session.get("id_utilisateur"):

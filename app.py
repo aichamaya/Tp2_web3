@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, make_response, session, g
+from flask import Flask, render_template, request, redirect, make_response, session,url_for,g
 from flask_babel import Babel
-from service import bp as service_bp
-from reservation import bp as reservation_bp
+from service import bp_service
+from reservation import bp_reservation
 from compte import bp as compte_bp
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "TP_CLE_SECRETE_TRES_SECURITAIRE"
@@ -21,9 +21,15 @@ def load_user():
             "credit": session.get("credit"),
         }
 
-app.register_blueprint(service_bp, url_prefix="/")
-app.register_blueprint(reservation_bp, url_prefix="/reservation")
+app.register_blueprint(bp_service, url_prefix="/")
+app.register_blueprint(bp_reservation, url_prefix="/reservation")
 app.register_blueprint(compte_bp, url_prefix="/compte")
+
+@app.route("/")
+def home():
+    """page acceuil"""
+    return redirect(url_for('service.home'))
+
 
 
 @app.post("/locale")

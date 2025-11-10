@@ -3,25 +3,25 @@ from flask import Blueprint, render_template, request, redirect, abort, flash, s
 from babel import numbers, dates
 import bd
 
-bp = Blueprint("service", __name__)
+bp_service = Blueprint("service", __name__)
 
 REGEXE_CHAMPS_HTML = re.compile(r"<(.*)>.*?|<(.*) />")
 
-@bp.route("/")
+@bp_service.route("/")
 def home():
     """Page d'accueil affichant les derniers services."""
     locale = request.cookies.get("local", "fr_CA")
-    try:
-        with bd.creer_connexion() as conn:
-            services = bd.get_service_all(conn)
-            if not services:
-                abort(400)
-        return render_template("home.jinja", services=services, locale=locale)
-    except Exception as e:
-        flash(f"Erreur de base de données au chargement de la page d'accueil: {e}", "danger")
-        return render_template("home.jinja", services=[], locale=locale)
+    
+    with bd.creer_connexion() as conn:
+         services = bd.get_service_all(conn)
+         if not services:
+            abort(400)
+    return render_template("services/home.jinja", services=services, locale=locale)
+    # except Exception as e:
+        # flash(f"Erreur de base de données au chargement de la page d'accueil: {e}", "danger")
+    # return render_template("services/home.jinja", services=[], locale=locale)
 
-@bp.route("/services")
+@bp_service.route("/services")
 def services_list():
     """Liste des services avec filtres."""
     locale = request.cookies.get("local", "fr_CA")
@@ -39,8 +39,8 @@ def services_list():
 
     return render_template("services/service_list.jinja", services=rows, categories=cats, locale=locale)
 
-@bp.route("/services/<int:service_id>")
-def service_detail(service_id: int):
+@bp_service.route("/services/<int:service_id>")
+def service_detail(service_id):
     """Détail d'un service."""
     locale = request.cookies.get("local", "fr_CA")
     devise = "USD" if locale == "en_US" else "CAD"
@@ -61,7 +61,7 @@ def service_detail(service_id: int):
     s["cout_formatte"] = numbers.format_currency(s["cout"], devise, locale=locale)
     return render_template("service_detail.jinja", s=s, locale=locale)
 
-@bp.route("/publish", methods=["GET", "POST"])
+@bp_service.route("/publish", methods=["GET", "POST"])
 def publish():
     """Ajout d'un service (auth requis)."""
     if not g.user:
@@ -117,9 +117,9 @@ def publish():
     flash("Service ajouté avec succès.", "success")
     return redirect(url_for(".service_detail", service_id=new_id), code=303)
 
-@bp.route("/services/<int:service_id>/edit", methods=["GET", "POST"])
+@bp_service.route("/services/<int:service_id>/edit", methods=["GET", "POST"])
 def edit_service(service_id: int):
-    """Édition d'un service (propriétaire seulement)."""
+    """Édition d'un service ."""
     if not g.user:
         flash("Vous devez être connecté pour modifier un service.", "warning")
         return redirect(url_for("compte.connexion"))

@@ -36,10 +36,11 @@ def get_curseur(self):
     finally:
         curseur.close()
 
+
 def hacher_mdp(mdp_en_clair):
     """Prend un mot de passe en clair et lui applique une fonction de hachage"""
     return hashlib.sha512(mdp_en_clair.encode('utf-8')).hexdigest()
-
+    
 def verifier_utilisateur(conn, motDePasse, courriel: str):
     """avoir un utlisateur grace à son couurile"""
     with conn.get_curseur() as curseur:
@@ -85,9 +86,8 @@ def get_credit_utilisateur(conn, id_utilisateur: int):
     """avoir un credit"""
     with conn.get_curseur() as curseur:
         curseur.execute("SELECT credit FROM utilisateurs WHERE id_utilisateur = %s", (id_utilisateur,))
-        r = curseur.fetchone()
-        return r["credit"] if r else 0
-
+        return curseur.fetchone()
+               
 def update_credit_utilisateur(conn, id_utilisateur: int, nouveau_credit: float):
     """mise à jour du compte de credit"""
     with conn.get_curseur() as curseur:
@@ -96,7 +96,6 @@ def update_credit_utilisateur(conn, id_utilisateur: int, nouveau_credit: float):
             (nouveau_credit, id_utilisateur),
         )
         return curseur.rowcount
-
 
 
 def get_categories(conn):
