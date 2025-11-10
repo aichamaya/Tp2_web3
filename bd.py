@@ -273,3 +273,13 @@ def get_reservations_for_owner(conn, id_proprietaire: int):
             (id_proprietaire,),
         )
         return curseur.fetchall()
+
+def obtenir_les_utilisateurs(conn):
+    """permet d'obtenir la liste des utilisateurs"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT id_utilisateur, nom_utilisateur, courriel, credit, role
+            FROM comptes 
+            ORDER BY id_utilisateur DESC
+        """)
+        return curseur.fetchall()
