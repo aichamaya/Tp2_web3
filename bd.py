@@ -36,31 +36,27 @@ def get_curseur(self):
     finally:
         curseur.close()
 
-def hacher_mdp(mdp_en_clair):
-    """Prend un mot de passe en clair et lui applique une fonction de hachage"""
-    return hashlib.sha512(mdp_en_clair.encode('utf-8')).hexdigest()
+# def hacher_mdp(mdp_en_clair):
+#     """Prend un mot de passe en clair et lui applique une fonction de hachage"""
+#     return hashlib.sha512(mdp_en_clair.encode('utf-8')).hexdigest()
 
-def verifier_utilisateur(conn, motDePasse, courriel: str):
-    """avoir un utlisateur grace à son couurile"""
+def verifier_utilisateur(conn, courriel):
+    """obtenir un utlisateur grâce à son couuriel"""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            SELECT id_utilisateur, courriel, mot_de_passe, credit, role
+            SELECT id_utilisateur
             FROM utilisateurs
-            WHERE courriel = %s
+            WHERE courriel = %(courriel)s
             """,
-            (courriel,),
+            {
+                "courriel" : courriel
+            }
+        
         )
         utilisateur = curseur.fetchone()
-    if utilisateur : 
-        mdp_formulaire = hacher_mdp(motDePasse)
-        mdp_bd = utilisateur["mot_de_passe"]
-        print(mdp_formulaire)
-        print(mdp_bd)
-        if mdp_formulaire == utilisateur["mot_de_passe"]:
-            del utilisateur["mot_de_passe"]
-            return utilisateur
-    return None
+
+    return utilisateur['id_utilisateur'] if utilisateur else None
 
 
 def ajout_utilisateur(conn, courriel: str, mot_de_passe_hache: str):
