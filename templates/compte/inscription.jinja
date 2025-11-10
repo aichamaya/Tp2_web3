@@ -23,14 +23,14 @@
             <label for="nom" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
             <input type="text" id="nom" name="nom" required
                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                   placeholder="Entrez votre nom" value="{{ request.form.nom or '' }}">
+                   placeholder="Entrez votre nom" value="{{ compte.nom|default('') }}">
         </div>
 
         <div>
             <label for="prenom" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
             <input type="text" id="prenom" name="prenom" required
                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                   placeholder="Entrez votre prénom" value="{{ request.form.prenom or '' }}">
+                   placeholder="Entrez votre prénom" value="{{ compte.prenom|default('') }}">
         </div>
 
         
@@ -38,7 +38,10 @@
             <label for="courriel" class="block text-sm font-medium text-gray-700 mb-1">Courriel</label>
             <input type="email" id="courriel" name="courriel" required
                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                   placeholder="exemple@domaine.com" value="{{ request.form.courriel or '' }}">
+                   placeholder="exemple@domaine.com" value="{{ compte.courriel|default('') }}">
+            {% if erreurs.courriel %}
+            <div class="invalid-feedback">{{ erreurs.courriel }}</div>
+            {% endif %}
         </div>
 
         <div>
@@ -46,6 +49,9 @@
             <input type="password" id="mot_de_passe" name="mot_de_passe" required
                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                    placeholder="Minimum 8 caractères">
+            {% if erreurs.mdp %}
+            <div class="invalid-feedback">{{ erreurs.mdp }}</div>
+            {% endif %}
         </div>
 
        
@@ -54,6 +60,9 @@
             <input type="password" id="confirm_mot_de_passe" name="confirm_mot_de_passe" required
                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                    placeholder="Retapez votre mot de passe">
+            {% if erreurs.confirmer_mdp %}
+            <div class="invalid-feedback">{{ erreurs.confirmer_mdp }}</div>
+            {% endif %}
         </div>
 
       
