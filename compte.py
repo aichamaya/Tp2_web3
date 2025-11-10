@@ -40,11 +40,7 @@ def inscription():
 
         with bd.creer_connexion() as conn:
             bd.ajout_utilisateur(
-                conn,
-                prenom = prenom,
-                nom = nom,
-                courriel=courriel,
-                mot_de_passe=mdp_hache
+                conn, prenom,nom,courriel,mdp_hache
                 )
 
         flash("Compte créé avec succès. Vous pouvez maintenant vous connecter.", "success")    
@@ -70,7 +66,7 @@ def connexion():
         courriel = (request.form.get("courriel") or "").strip()
         mot_de_passe = request.form.get("mot_de_passe", "") 
         with bd.creer_connexion() as conn:
-            utilisateur = bd.verifier_utilisateur(conn,courriel,mot_de_passe)
+            utilisateur = bd.verifier_utilisateur_existe(conn,courriel)
             if utilisateur:
                 session["nom"] = utilisateur["nom"]
                 session["prenom"] = utilisateur["prenom"]      
