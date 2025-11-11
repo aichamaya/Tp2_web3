@@ -3,7 +3,7 @@
 
 {% block contenu %}
 <h1 class="h3 mb-3">Éditer le service</h1>
-<form method="post" action="/services/edit" novalidate>
+<form method="post" action="{{url_for('service.edit_service',service_id = s.id_service)}}" novalidate>
 <input type="hidden" name="service_id" value="{{ s.id_service }}">
   <div class="row g-3">
 

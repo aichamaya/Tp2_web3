@@ -17,7 +17,7 @@
       <li><strong>Statut :</strong> {{ 'Actif' if s.actif==1 else 'Inactif' }}</li>
     </ul>
 
-    <a class="btn btn-primary" href="/services/edit?service_id={{ s.id_service }}">Modifier</a>
+    <a class="btn btn-primary" href="{{url_for('service.edit_service',service_id= s.id_service)}}">Modifier</a>
     <a class="btn btn-outline-secondary" href="/services">Retour</a>
 
   </div>
@@ -29,24 +29,6 @@
     <img class="img-fluid rounded" style="object-fit: cover; height: 400px; width: 100%;" src="{{ image_src }}"
       alt="{{ s.titre }}">
   </div>
-  <div class="col-lg-5">
-    <h1 class="h4">{{ s.titre }}</h1>
-    <p class="text-muted mb-1"><span class="badge text-bg-secondary">{{ s.nom_categorie }}</span></p>
-    <p class="text-muted"><i class="bi bi-geo-alt-fill"></i> {{ s.localisation }}</p>
-    <p>{{ s.description }}</p>
-    <ul class="list-unstyled">
-      <li><strong>Coût :</strong> {{ s.cout_formatte }}</li>
-      <li><strong>Date d’ajout :</strong> {{ s.date_creation }}</li>
-      <li><strong>Statut :</strong> <span class="badge bg-{{ 'success' if s.actif==1 else 'warning' }}">{{ 'Actif' if
-          s.actif==1 else 'Inactif' }}</span></li>
-    </ul>
 
-    {% if session.id_utilisateur and session.id_utilisateur == s.id_utilisateur %}
-    <a class="btn btn-primary me-2"
-      href="{{ url_for('service.edit_service_qs', service_id=s.id_service) }}">Modifier</a>
-    {% endif %}
-    <a class="btn btn-outline-secondary" href="{{ url_for('service.services_list') }}">Retour</a>
-
-  </div>
 </div>
 {% endblock %}

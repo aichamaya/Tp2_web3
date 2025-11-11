@@ -1,7 +1,7 @@
 import re
-from flask import Blueprint, render_template, request, redirect, abort, flash, current_app, session, url_for,g
+from flask import Blueprint, render_template, request, redirect, abort, flash, current_app, session, url_for,current_app as app
 from babel import numbers, dates
-
+from datetime import datetime
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -15,15 +15,15 @@ REGEXE_CHAMPS_HTML = re.compile(r"<(.*)>.*?|<(.*) />")
 def home():
     """Page d'accueil affichant les derniers services."""
     locale = request.cookies.get("local", "fr_CA")
-    
-    with bd.creer_connexion() as conn:
-         services = bd.get_service_all(conn)
-         if not services:
-            abort(400)
-    return render_template("services/home.jinja", services=services, locale=locale)
-    # except Exception as e:
-        # flash(f"Erreur de base de données au chargement de la page d'accueil: {e}", "danger")
-    # return render_template("services/home.jinja", services=[], locale=locale)
+    try:
+        with bd.creer_connexion() as conn:
+            services = bd.get_service_all(conn)
+            if not services:
+             abort(400)
+        return render_template("services/home.jinja", services=services, locale=locale)
+    except Exception :
+        abort(500)
+    return render_template("services/home.jinja", services=[], locale=locale)
 
 @bp_service.route("/services")
 def services_list():
@@ -46,19 +46,14 @@ def services_list():
 @bp_service.route("/<int:id_service>/supprimer", methods=["POST", "GET"])
 def supprimer_service(id_service):
     """Vérifie si l'utilisateur est un admin"""
-    if not session.get('est_admin', False):
-        
+    if not session.get('est_admin', False):       
         flash("Accès refusé !", "danger")
         return redirect(url_for('service.services_list'))
-
     with bd.creer_connexion() as conn:
-        bd.supprimer_service(conn, id_service)
-
-  
+        bd.supprimer_service(conn, id_service) 
     flash("Le service a été supprimé !", "success")
     return redirect(url_for('service.services_list'))
      
-
 @bp_service.route("/services/<int:service_id>")
 def service_detail(service_id: int):
     """Détail d'un service."""
@@ -79,24 +74,24 @@ def service_detail(service_id: int):
 
     s["date_creation_formattee"] = dates.format_date(s["date_creation"], locale=locale)
     s["cout_formatte"] = numbers.format_currency(s["cout"], devise, locale=locale)
-    return render_template("service_detail.jinja", s=s, locale=locale)
+    return render_template("services/service_detail.jinja", s=s, locale=locale)
 
 @bp_service.route("/publish", methods=["GET", "POST"])
 def publish():
-    """Ajout d'un service (auth requis)."""
-    if not g.user:
-        flash("Vous devez être connecté pour publier un service.", "warning")
-        return redirect(url_for("compte.connexion"))
+    """Ajout d'un service ."""
+    # if "user_id" not in session:
+    #     flash("Vous devez être connecté pour publier un service.", "warning")
+    #     return redirect(url_for("compte.connexion"))
 
-    id_proprietaire = g.user["id"]
+    id_proprietaire = session["user_id"]
     locale = request.cookies.get("local", "fr_CA")
 
     if request.method == "GET":
         with bd.creer_connexion() as conn:
             cats = bd.get_categories(conn)
-        return render_template("service_form.jinja", categories=cats, errors={}, form={}, locale=locale)
+        return render_template("services/service_form.jinja", categories=cats, errors={}, form={}, locale=locale)
 
-   
+    # Traitement du formulaire POST
     titre = (request.form.get("titre") or "").strip()
     localisation = (request.form.get("localisation") or "").strip()
     description = (request.form.get("description") or "").strip()
@@ -128,14 +123,15 @@ def publish():
             'photo': photo
         }
         return render_template("service_form.jinja", categories=cats, errors=errors, form=form, locale=locale), 400
-    src = None
 
+    src = None
     nom_photo = "generer-nom-unique.jpg"
     if photo and photo.filename != '':
-            nom_photo = uuid.uuid4().hex + '_' + secure_filename(photo.filename)
-            chemin = os.path.join(current_app.config['CHEMIN_VERS_AJOUTS'], nom_photo)
-            photo.save(chemin)
-            src = "/" + current_app.config['ROUTE_VERS_AJOUTS'] + "/" + nom_photo
+        nom_photo = uuid.uuid4().hex + '_' + secure_filename(photo.filename)
+        chemin = os.path.join(current_app.config['CHEMIN_VERS_AJOUTS'], nom_photo)
+        photo.save(chemin)
+        src = "/" + current_app.config['ROUTE_VERS_AJOUTS'] + "/" + nom_photo
+
     try:
         with bd.creer_connexion() as conn:
             new_id = bd.ajout_service(conn, id_categorie, titre, description, localisation, actif, cout, id_proprietaire)
@@ -150,11 +146,11 @@ def publish():
 @bp_service.route("/services/<int:service_id>/edit", methods=["GET", "POST"])
 def edit_service(service_id: int):
     """Édition d'un service ."""
-    if not g.user:
-        flash("Vous devez être connecté pour modifier un service.", "warning")
-        return redirect(url_for("compte.connexion"))
+    # if "user_id" not in session:
+    #     flash("Vous devez être connecté pour modifier un service.", "warning")
+    #     return redirect(url_for("compte.connexion"))
 
-    id_utilisateur_session = g.user["id"]
+    # id_utilisateur_session = session["user_id"]
     locale = request.cookies.get("local", "fr_CA")
 
     if not service_id:
@@ -166,9 +162,9 @@ def edit_service(service_id: int):
             if not s:
                 abort(404)
 
-            if s["id_utilisateur"] != id_utilisateur_session:
-                flash("Vous n'êtes pas autorisé à modifier ce service.", "danger")
-                abort(403)
+            # if s["id_utilisateur"] != id_utilisateur_session:
+            #     flash("Vous n'êtes pas autorisé à modifier ce service.", "danger")
+            #     abort(403)
 
             cats = bd.get_categories(conn)
 
@@ -180,8 +176,9 @@ def edit_service(service_id: int):
                     "actif": str(s["actif"]),
                     "cout": s["cout"],
                 }
-                return render_template("service_edit.jinja", s=s, categories=cats, errors={}, form=form_data, locale=locale)
+                return render_template("services/service_edit.jinja", s=s, categories=cats, errors={}, form=form_data, locale=locale)
 
+            # Traitement du formulaire POST
             titre = (request.form.get("titre") or "").strip()
             localisation = (request.form.get("localisation") or "").strip()
             description = (request.form.get("description") or "").strip()
@@ -210,9 +207,17 @@ def edit_service(service_id: int):
             bd.update_service(conn, service_id, titre, localisation, description, actif, cout)
 
             flash("Service mis à jour.", "success")
-            return redirect(url_for(".service_detail", service_id=service_id), code=303)
+            return redirect(url_for("service.service_detail", service_id=service_id), code=303)
 
     except Exception as e:
         print(f"Erreur d'édition de service: {e}")
         flash("Erreur lors de la mise à jour du service en base de données.", "danger")
-        return redirect(url_for(".edit_service", service_id=service_id))
+        return render_template("services/service_edit.jinja")
+    
+def enregistrer_image(photo):
+    """Permet d'enregistrer l'image."""
+    extension_image = os.path.splitext(photo.filename)[1]
+    nom_image = datetime.now().strftime("%Y%m%d_%H%M%S")+extension_image
+    chemin_complet = os.path.join(app.config['CHEMIN_VERS_AJOUTS'], nom_image)
+    photo.save(chemin_complet)
+    return nom_image

@@ -3,7 +3,11 @@ from flask_babel import Babel
 from service import bp_service
 from reservation import bp_reservation
 from compte import bp_compte
+import os
+
 app = Flask(__name__)
+app.config['CHEMIN_VERS_AJOUTS'] = os.path.join('static', 'images', 'ajouts')
+os.makedirs(app.config['CHEMIN_VERS_AJOUTS'], exist_ok=True)
 app.config["SECRET_KEY"] = "TP_CLE_SECRETE_TRES_SECURITAIRE"
 app.config["BABEL_DEFAULT_LOCALE"] = "fr_CA"
 babel = Babel(app)
@@ -28,7 +32,7 @@ app.register_blueprint(bp_compte, url_prefix="/compte")
 @app.route("/")
 def home():
     """page acceuil"""
-    return redirect(url_for('services_listcls'))
+    return redirect(url_for('services_list'))
 
 
 

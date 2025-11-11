@@ -57,19 +57,18 @@ def verifier_utilisateur_existe(conn, courriel):
         utilisateur = curseur.fetchone()
 
     return utilisateur['id_utilisateur'] if utilisateur else None
-
+    
 def authentifier(conn, courriel, mdp):
-    """Retourne un utilisateur avec le courriel et le mdp"""
+    """Retourne un utilisateur avec le courriel et le mot de passe"""
     with conn.get_curseur() as curseur:
         curseur.execute(
-            "SELECT * FROM utilisateur WHERE courriel=%(courriel)s and mdp=%(mdp)s",
+            "SELECT courriel , mot_de_passe FROM utilisateurs WHERE courriel = %(courriel)s AND mot_de_passe = %(mot_de_passe)s",
             {
                 "courriel": courriel,
-                "mdp" : mdp
+                "mot_de_passe": mdp  
             }
         )
         return curseur.fetchone()
-
 
 
 def ajout_utilisateur(conn, prenom, nom, courriel, mot_de_passe_hache):
@@ -77,20 +76,19 @@ def ajout_utilisateur(conn, prenom, nom, courriel, mot_de_passe_hache):
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            INSERT INTO utilisateurs (prenom, nom, courriel, mot_de_passe, role, credit)
+            INSERT INTO utilisateurs (prenom, nom, courriel, mot_de_passe, credit,role)
             VALUES (
             %(prenom)s, 
             %(nom)s, 
             %(courriel)s, 
             %(mot_de_passe)s, 
-             0, 0)
+             0, 0,"admin")
             """,
             {
                 'prenom': prenom,
                 'nom': nom,
                 'courriel': courriel,
-                'mot_de_passe':  mot_de_passe_hache
-         
+                'mot_de_passe':  mot_de_passe_hache       
             }
                 
         )
@@ -289,8 +287,8 @@ def obtenir_les_utilisateurs(conn):
     """permet d'obtenir la liste des utilisateurs"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
-            SELECT id_utilisateur, nom_utilisateur, courriel, credit, role
-            FROM comptes 
-            ORDER BY id_utilisateur DESC
+            SELECT *
+            FROM utilisateurs
+            
         """)
         return curseur.fetchall()

@@ -65,19 +65,24 @@ def connexion():
 
     if request.method == "POST":
         courriel = (request.form.get("courriel") or "").strip()
-        mot_de_passe = request.form.get("mot_de_passe", "") 
+        mot_de_passe = request.form.get("mot_de_passe", "").strip() 
         mdp = hacher_mdp(mot_de_passe)
+        print(mdp)
         with bd.creer_connexion() as conn:
-            utilisateur = bd.authentifier(conn,courriel,mdp)
-            if utilisateur:
-                session["nom"] = utilisateur["nom"]
-                session["prenom"] = utilisateur["prenom"]    
-                session["id_utilisateur"] = utilisateur["id_utilisateur"]
-                session["courriel"] = utilisateur["courriel"]
-                session["role"] = utilisateur["role"]
-                session["credit"] = utilisateur["credit"]
-            
-                flash(f"Connexion réussie. Bienvenue, {utilisateur['courriel']}.", "success")
+            utilisateurs = bd.obtenir_les_utilisateurs(conn)
+            utilisateurTrouve = None
+            for utilisateur in utilisateurs:
+                if utilisateur["courriel"] == courriel and utilisateur["mot_de_passe"] == mdp:
+                    utilisateurTrouve = utilisateur
+            print(utilisateurTrouve)
+            if utilisateurTrouve:
+                session["nom"] = utilisateurTrouve["nom"]
+                session["prenom"] = utilisateurTrouve["prenom"]    
+                session["user_id"] = utilisateurTrouve["id_utilisateur"]
+                session["courriel"] = utilisateurTrouve["courriel"]
+                session["role"] = utilisateurTrouve["role"]
+                session["credit"] = utilisateurTrouve["credit"]          
+                flash(f"Connexion réussie. Bienvenue, {utilisateurTrouve['courriel']}.", "success")
                 return redirect(url_for("home"), 302) 
             else:
                 flash("Courriel ou mot de passe incorrect.", "danger")
