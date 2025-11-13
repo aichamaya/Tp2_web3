@@ -78,7 +78,7 @@ def connexion():
             if utilisateurTrouve:
                 session["nom"] = utilisateurTrouve["nom"]
                 session["prenom"] = utilisateurTrouve["prenom"]    
-                session["user_id"] = utilisateurTrouve["id_utilisateur"]
+                session["id_utilisateur"] = utilisateurTrouve["id_utilisateur"]
                 session["courriel"] = utilisateurTrouve["courriel"]
                 session["role"] = utilisateurTrouve["role"]
                 session["credit"] = utilisateurTrouve["credit"]          
@@ -128,10 +128,10 @@ def supprimer_compte(user_id):
 
 @bp_compte.route("/utilisateurs")
 def liste_utilisateurs():
-    if "utilisateur_id" not in session:
+    if "id_utilisateur" not in session:
         flash("Pour accéder à cette page, veuillez vous connecter à votre compte.", "warning")
         return redirect(url_for('compte.connexion'))    
-    if session.get("role") != 1:
+    if session.get("role") != "admin":
         abort(403)
     with bd.creer_connexion() as conn:
         utilisateurs = bd.obtenir_les_utilisateurs(conn)
