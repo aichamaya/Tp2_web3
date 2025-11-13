@@ -27,24 +27,15 @@ def inscription():
             with bd.creer_connexion() as conn:
                 if bd.verifier_utilisateur_existe(conn, courriel):
                     erreurs["courriel"] = "Ce courriel est déjà utilisé."
-                    return render_template(
-                        "compte/inscription.jinja",
-                        titre="Créer un compte",
-                        erreurs=erreurs,
-                        compte={"nom": nom, "prenom": prenom, "courriel": courriel}
-            )
-                
-        else:
-            mdp_hache = hacher_mdp(mot_de_passe)
+                 
+                else:
+                    mdp_hache = hacher_mdp(mot_de_passe)
+                    with bd.creer_connexion() as conn:
+                        bd.ajout_utilisateur(conn, nom, prenom, courriel, mdp_hache)
 
-            with bd.creer_connexion() as conn:
-                bd.ajout_utilisateur(
-                    conn, nom, prenom, courriel, mdp_hache
-                    )
-
-            flash("Compte créé avec succès. Vous pouvez maintenant vous connecter.", "success")    
-            return redirect(url_for('service.services_list'), code= 303)       
-    
+                        flash("Compte créé avec succès. Vous pouvez maintenant vous connecter.", "success")    
+                        return redirect(url_for('compte.connexion'), code= 303)       
+            
     return render_template(
         'compte/inscription.jinja',
         titre="Créer un compte",
@@ -76,7 +67,7 @@ def connexion():
             if utilisateurTrouve:
                 session["nom"] = utilisateurTrouve["nom"]
                 session["prenom"] = utilisateurTrouve["prenom"]    
-                session["user_id"] = utilisateurTrouve["id_utilisateur"]
+                session["id_utilisateur"] = utilisateurTrouve["id_utilisateur"]
                 session["courriel"] = utilisateurTrouve["courriel"]
                 session["role"] = utilisateurTrouve["role"]
                 session["credit"] = utilisateurTrouve["credit"]          
@@ -129,7 +120,7 @@ def liste_utilisateurs():
     if "utilisateur_id" not in session:
         flash("Pour accéder à cette page, veuillez vous connecter à votre compte.", "warning")
         return redirect(url_for('compte.connexion'))    
-    if session.get("role") != 1:
+    if session.get("role") != "admin":
         abort(403)
     with bd.creer_connexion() as conn:
         utilisateurs = bd.obtenir_les_utilisateurs(conn)
