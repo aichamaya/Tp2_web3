@@ -19,7 +19,7 @@
 
  
 
-    {% if session.id_utilisateur %}
+    {% if session.id_utilisateur and (session.id_utilisateur == s.id_utilisateur or session.role == 'admin') %}
       <a class="btn btn-primary" href="{{url_for('service.edit_service',service_id= s.id_service)}}">Modifier</a>
       <a class="btn btn-primary" href="{{url_for('service.supprimer_service',service_id= s.id_service)}}">Supprimer</a>
     {% endif %}
