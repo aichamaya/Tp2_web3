@@ -27,14 +27,14 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('reservation.liste_reservations') }}">Mes
               Réservations</a></li> 
         </ul>
-        <form action="{{ url_for('compte.deconnexion') }}" method="post" class="d-flex align-items-center me-3">
-          {% if session.id_utilisateur %}
+        <div>
+        {% if not session.get("user_id") %}
+          <a href="{{ url_for('compte.connexion') }}"  class="btn btn-outline-light"> Se connecter </a>
+        {% else %}       
           <span class="text-white me-2 small">Connecté : <strong>{{ session.courriel }}</strong></span>
-          <button type="submit" class="btn btn-outline-light">Déconnexion</button>
-          {% else %}
-          <a href="{{ url_for('compte.connexion') }}" class="btn btn-outline-light">Connexion</a>
+          <a href="{{ url_for('compte.deconnexion') }}" class="btn btn-outline-light">Déconnexion</a>
           {% endif %}
-        </form>
+        </div>         
         <form action="{{ url_for('set_locale') }}" method="post" class="d-flex align-items-center">
           <select name="local_code" class="form-select form-select-sm me-2">
             <option value="fr_CA" {{ 'selected' if request.cookies.get('local')=='fr_CA' else '' }}>fr_CA</option>

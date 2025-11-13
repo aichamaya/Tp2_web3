@@ -7,11 +7,11 @@ bp_reservation = Blueprint("reservation", __name__)
 @bp_reservation.route("reservation/", methods=["GET"])
 def liste_reservations():
     """Affiche les réservations faites et reçues."""
-    if not session.get("id_utilisateur"):
+    if not session:
         flash("Vous devez être connecté pour voir vos réservations.", "warning")
         return redirect(url_for("compte.connexion"))
 
-    id_utilisateur = session["id_utilisateur"]
+    id_utilisateur = session["user_id"]
     locale = request.cookies.get("local", "fr_CA")
 
     with bd.creer_connexion() as conn:

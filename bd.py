@@ -152,18 +152,17 @@ def search_services(conn, q: str = "", categorie=None, localisation: str = ""):
         curseur.execute(sql, params)
         return curseur.fetchall()
 
-def get_service_by_id(conn, service_id: int):
+def get_service_by_id(conn, service_id):
     """avoir un service par son ID"""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            SELECT s.*, c.nom_categorie, u.courriel AS courriel_proprietaire
+            SELECT s.*, c.nom_categorie
             FROM services s
-            JOIN categories c USING(id_categorie)
-            JOIN utilisateurs u ON s.id_utilisateur = u.id_utilisateur
-            WHERE s.id_service = %s
+            JOIN categories c ON s.id_categorie = c.id_categorie
+            WHERE id_service = %s
             """,
-            (service_id,),
+            (service_id,)
         )
         return curseur.fetchone()
 

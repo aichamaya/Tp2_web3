@@ -54,8 +54,9 @@
       <div class="card-body">
         <h5 class="card-title mb-1">{{ s.titre }}</h5>
         <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
-        <a class="stretched-link" href="{{ url_for('service.service_detail', service_id=s.id_service) }}"></a>
+        
       </div>
+      <a class="btn btn-primary" href="{{ url_for('service.service_detail', service_id=s.id_service) }}">Détail</a>
     </div>
   </div>
   {% else %}
