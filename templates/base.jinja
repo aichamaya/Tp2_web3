@@ -24,16 +24,21 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('service.publish') }}">Ajouter un service</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('service.services_list') }}">Tous les services</a>
           </li>
+          {% if session.role == "admin" %}
+             <li class="nav-item"><a class="nav-link" href="{{ url_for('compte.liste_utilisateurs') }}">Utilisateur</a></li> 
+          {% else %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('reservation.liste_reservations') }}">Mes
-              Réservations</a></li> 
+              Réservations</a></li>
+          {% endif%} 
         </ul>
         <div>
-        {% if not session.get("user_id") %}
-          <a href="{{ url_for('compte.connexion') }}"  class="btn btn-outline-light"> Se connecter </a>
-        {% else %}       
+        
+        {% if id_utilisateur in session %}       
           <span class="text-white me-2 small">Connecté : <strong>{{ session.courriel }}</strong></span>
           <a href="{{ url_for('compte.deconnexion') }}" class="btn btn-outline-light">Déconnexion</a>
-          {% endif %}
+        {% else %}
+          <a href="{{ url_for('compte.connexion') }}"  class="btn btn-outline-light"> Se connecter </a>
+        {% endif %}
         </div>         
         <form action="{{ url_for('set_locale') }}" method="post" class="d-flex align-items-center">
           <select name="local_code" class="form-select form-select-sm me-2">
