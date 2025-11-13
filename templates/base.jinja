@@ -30,7 +30,7 @@
         <form action="{{ url_for('compte.deconnexion') }}" method="post" class="d-flex align-items-center me-3">
           {% if session.id_utilisateur %}
           <span class="text-white me-2 small">Connecté : <strong>{{ session.courriel }}</strong></span>
-          <button type="submit" class="btn btn-outline-light">Déconnexion</button>
+          <a href="{{ url_for('compte.deconnexion') }}" class="btn btn-outline-light">Déconnexion</a>
           {% else %}
           <a href="{{ url_for('compte.connexion') }}" class="btn btn-outline-light">Connexion</a>
           {% endif %}

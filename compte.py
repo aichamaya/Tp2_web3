@@ -81,9 +81,10 @@ def connexion():
 @bp_compte.route("/deconnexion")
 def deconnexion():
     """Gère la déconnexion de l'utilisateur ."""
+          
     session.clear() 
     flash("Vous avez été déconnecté.", "info")
-    return redirect(url_for("service.home"), 302)
+    return redirect(url_for("service.home"), code= 303)
 
 @bp_compte.route("/supprimer/<int:user_id>", methods=["POST"])
 def supprimer_compte(user_id):
