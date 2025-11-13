@@ -118,11 +118,7 @@ def supprimer_compte(user_id):
 
 @bp_compte.route("/utilisateurs")
 def liste_utilisateurs():
-    if "utilisateur_id" not in session:
-        flash("Pour accéder à cette page, veuillez vous connecter à votre compte.", "warning")
-        return redirect(url_for('compte.connexion'))    
-    if session.get("role") != "admin":
-        abort(403)
+
     with bd.creer_connexion() as conn:
         utilisateurs = bd.obtenir_les_utilisateurs(conn)
     return render_template("compte/listeUtilisateur.jinja", utilisateurs=utilisateurs, titre="Utilisateurs")

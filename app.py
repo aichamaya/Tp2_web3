@@ -48,6 +48,7 @@ def set_locale():
     return resp
 
 
+
 @app.errorhandler(403)
 def e403(_e):
     """Pour les erreurs 403 (Accès Interdit)."""
