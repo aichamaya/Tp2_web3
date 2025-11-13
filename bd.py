@@ -8,9 +8,10 @@ def creer_connexion():
     """Crée une connexion MySQL et commit/rollback automatiquement."""
     conn = mysql.connector.connect(
         user="root",
-        password="Maya2016",
+        password="abcdef",
         host="127.0.0.1",
-        database="services_particuliers",
+        port = 3307 ,
+        database="services_particuliers1",
         raise_on_warnings=True,
        
     )
@@ -19,13 +20,17 @@ def creer_connexion():
 
     try:
         yield conn
+        print("CONN")
     except Exception:
         conn.rollback()
+        print("ROLL")
         raise
     else:
         conn.commit()
+        print("Commmit")
     finally:
         conn.close()
+        print("CLOSE")
 
 @contextlib.contextmanager
 def get_curseur(self):
@@ -33,8 +38,11 @@ def get_curseur(self):
     curseur = self.cursor(dictionary=True, buffered=True)
     try:
         yield curseur
+        print("A")
+     
     finally:
         curseur.close()
+        print("B")
 
 # def hacher_mdp(mdp_en_clair):
 #     """Prend un mot de passe en clair et lui applique une fonction de hachage"""
@@ -71,22 +79,23 @@ def authentifier(conn, courriel, mdp):
         return curseur.fetchone()
 
 
-def ajout_utilisateur(conn, prenom, nom, courriel, mot_de_passe_hache):
+def ajout_utilisateur(conn, nom, prenom, courriel, mot_de_passe_hache):
     """ajoute un utilisateur"""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            INSERT INTO utilisateurs (prenom, nom, courriel, mot_de_passe, credit,role)
-            VALUES (
-            %(prenom)s, 
+            INSERT INTO utilisateurs (nom, prenom, courriel, mot_de_passe, credit,role)
+            VALUES (          
             %(nom)s, 
+            %(prenom)s,
             %(courriel)s, 
             %(mot_de_passe)s, 
-             0, 0,"admin")
+             0, 'utilisateur')
             """,
             {
-                'prenom': prenom,
+              
                 'nom': nom,
+                'prenom': prenom,
                 'courriel': courriel,
                 'mot_de_passe':  mot_de_passe_hache       
             }

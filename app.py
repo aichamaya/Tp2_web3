@@ -25,14 +25,14 @@ def load_user():
             "credit": session.get("credit"),
         }
 
-app.register_blueprint(bp_service, url_prefix="/")
+app.register_blueprint(bp_service, url_prefix="/service")
 app.register_blueprint(bp_reservation, url_prefix="/reservation")
 app.register_blueprint(bp_compte, url_prefix="/compte")
 
 @app.route("/")
 def home():
     """page acceuil"""
-    return redirect(url_for('services_list'))
+    return redirect(url_for('service.services_list'), code= 303)
 
 
 

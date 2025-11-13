@@ -12,7 +12,7 @@ def hacher_mdp(mdp_en_clair):
 
 @bp_compte.route('/inscription', methods=["GET", "POST"])
 def inscription():
-
+    """Créer un nouveau compte utilisateur"""
     if request.method == "POST":
 
         prenom = request.form.get("prenom", "").strip()
@@ -27,25 +27,23 @@ def inscription():
             with bd.creer_connexion() as conn:
                 if bd.verifier_utilisateur_existe(conn, courriel):
                     erreurs["courriel"] = "Ce courriel est déjà utilisé."
+                    return render_template(
+                        "compte/inscription.jinja",
+                        titre="Créer un compte",
+                        erreurs=erreurs,
+                        compte={"nom": nom, "prenom": prenom, "courriel": courriel}
+            )
+                
+        else:
+            mdp_hache = hacher_mdp(mot_de_passe)
 
-        if erreurs:
-            return render_template(
-                "compte/inscription.jinja",
-                titre="Créer un compte",
-                erreurs=erreurs,
-                compte={"prenom": prenom, "nom": nom, "courriel": courriel}
-            ),       
-                    
-   
-        mdp_hache = hacher_mdp(mot_de_passe)
+            with bd.creer_connexion() as conn:
+                bd.ajout_utilisateur(
+                    conn, nom, prenom, courriel, mdp_hache
+                    )
 
-        with bd.creer_connexion() as conn:
-            bd.ajout_utilisateur(
-                conn, prenom,nom,courriel,mdp_hache
-                )
-
-        flash("Compte créé avec succès. Vous pouvez maintenant vous connecter.", "success")    
-        return redirect(url_for("services_list"))
+            flash("Compte créé avec succès. Vous pouvez maintenant vous connecter.", "success")    
+            return redirect(url_for('service.services_list'), code= 303)       
     
     return render_template(
         'compte/inscription.jinja',
