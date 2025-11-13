@@ -229,14 +229,28 @@ def update_service_with_image(conn, service_id, titre, localisation, description
         )
         return curseur.rowcount
     
-def supprimer_service(conn, id_service):
+def supprimer_service(conn, id_service, id_utilisateur_session, role_session):
+    """Supprime un service seulement si le propriétaire est l'utilisateur connecté."""
+    
     with conn.get_curseur() as curseur:
-        curseur.execute(
-            'DELETE FROM services WHERE id_service = %(id)s',
-            {'id': id_service}
-        )
-    conn.commit() 
+        curseur.execute("""
+            SELECT id_utilisateur
+            FROM services
+            WHERE id_service = %(id)s
+        """, {"id": id_service})
+        
+        proprietaire = curseur.fetchone()
 
+        if proprietaire and proprietaire["id_utilisateur"] != id_utilisateur_session and role_session != "admin":
+            return False, "Vous n'avez pas la permission de supprimer ce service."
+
+        curseur.execute("""
+            DELETE FROM services 
+            WHERE id_service = %(id)s
+        """, {"id": id_service})
+
+    conn.commit()
+    return True, "Service supprimé."
 
 
 def ajout_reservation(conn, id_service, id_utilisateur, date_reservation, date_souhaitee, cout_paye):

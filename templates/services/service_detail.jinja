@@ -18,6 +18,11 @@
     </ul>
 
     <a class="btn btn-primary" href="{{url_for('service.edit_service',service_id= s.id_service)}}">Modifier</a>
+
+    {% if session.id_utilisateur %}
+    <a class="btn btn-primary" href="{{url_for('service.supprimer_service',service_id= s.id_service)}}">Supprimer</a>
+    {% endif %}
+    
     <a class="btn btn-outline-secondary" href="/services">Retour</a>
 
   </div>
