@@ -46,7 +46,12 @@
                                 placeholder="Votre mot de passe">
                         </div>
 
-                       
+                         <p class="mt-4 text-center text-muted">
+                        Pas encore de compte ?
+                        <a href="{{ url_for('compte.inscription') }}" class="text-decoration-none">
+                            Inscrivez-vous ici
+                        </a>
+                        </p>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 Se Connecter
