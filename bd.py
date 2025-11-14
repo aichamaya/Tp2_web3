@@ -181,15 +181,15 @@ def get_service_all(conn):
         )
         return curseur.fetchall()
 
-def ajout_service(conn, id_categorie, titre, description, localisation, actif, cout, id_proprietaire):
+def ajout_service(conn, id_categorie, titre, description, localisation, actif, cout, id_proprietaire, nom_image):
     """ajout de service"""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            INSERT INTO services (id_categorie, titre, description, localisation, actif, cout, id_utilisateur)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO services (id_categorie, titre, description, localisation, actif, cout, nom_image, id_utilisateur)
+            VALUES (%s, %s, %s, %s, %s, %s, %s,%s)
             """,
-            (id_categorie, titre, description, localisation, actif, cout, id_proprietaire),
+            (id_categorie, titre, description, localisation, actif, cout, nom_image, id_proprietaire),
         )
         return curseur.lastrowid
 

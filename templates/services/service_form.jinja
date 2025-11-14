@@ -2,7 +2,8 @@
 {% block title %}Ajouter un service{% endblock %}
 {% block contenu %}
 <h1 class="h3 mb-3">Ajouter un service</h1>
-<form method="post" action="/publish" novalidate>
+<form method="post" action="/publish" enctype="multipart/form-data" novalidate>
+
   <div class="row g-3">
     <div class="col-md-6">
       <label class="form-label">Titre</label>
@@ -34,6 +35,14 @@
       <textarea class="form-control {{ 'is-invalid' if errors.get('description') }}" name="description" rows="4">{{ form.description or '' }}</textarea>
       {% if errors.get('description') %}<div class="form-error">{{ errors['description'] }}</div>{% endif %}
     </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Photo</label>
+      <input type="file" class="form-control" name="photo" id="photo" >
+      {% if errors.get('photo') %}<div class="form-error">{{ errors['photo'] }}</div>{% endif %}
+
+    </div>
+  
     <div class="col-md-4">
       <label class="form-label">Statut</label>
       <select class="form-select" name="actif">

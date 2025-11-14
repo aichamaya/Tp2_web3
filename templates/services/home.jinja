@@ -16,8 +16,7 @@
     </div>
   </div>
   <div class="col-lg-5">
-    <img class="img-fluid rounded-3 h-100 object-fit-cover"
-      src="{{ url_for('static', filename='images/default_service.png') }}" alt="Sport">
+    <img class="img-fluid rounded-3 h-100 object-fit-cover" src="" alt="Sport">
 
   </div>
 </div>
@@ -48,13 +47,12 @@
   {% for s in services %}
   <div class="col-md-4">
     <div class="card h-100">
-      {% set image_src = url_for('static', filename='images/' + s.nom_image) if s.nom_image else url_for('static',
-      filename='images/default_service.png') %}
-      <img class="card-img-top object-fit-cover" style="height: 200px;" src="{{ image_src }}" alt="{{ s.titre }}">
+      <img class="card-img-top object-fit-cover" style="height: 200px;"
+        src="{{ url_for('static', filename='images/ajouts/' ~ s.nom_image) }}" alt="{{ s.titre }}">
       <div class="card-body">
         <h5 class="card-title mb-1">{{ s.titre }}</h5>
         <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
-        
+
       </div>
       <a class="btn btn-primary" href="{{ url_for('service.service_detail', service_id=s.id_service) }}">Détail</a>
     </div>

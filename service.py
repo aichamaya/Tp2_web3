@@ -78,7 +78,7 @@ def publish():
     # if "user_id" not in session:
     #     flash("Vous devez être connecté pour publier un service.", "warning")
     #     return redirect(url_for("compte.connexion"))
-
+    image_nom= ""
     id_proprietaire = session["id_utilisateur"]
     locale = request.cookies.get("local", "fr_CA")
 
@@ -105,6 +105,12 @@ def publish():
         errors["titre"] = "Le titre est obligatoire (1 à 50 caractères)."
     if cout < 0:
         errors["cout"] = "Le coût doit être un nombre positif."
+    if photo and photo.filename != "":
+        if not photo.content_type.startswith('image/'):
+            errors["nom_image"] = "Veuillez selectionner une image"
+        else :
+            image_nom = enregistrer_image(photo)
+
 
     if errors:
         with bd.creer_connexion() as conn:
@@ -116,21 +122,13 @@ def publish():
             "id_categorie": id_categorie,
             "actif": str(actif),
             "cout": request.form.get("cout", ""),
-            'photo': photo
+            'photo': image_nom
         }
         return render_template("service_form.jinja", categories=cats, errors=errors, form=form, locale=locale), 400
 
-    src = None
-    nom_photo = "generer-nom-unique.jpg"
-    if photo and photo.filename != '':
-        nom_photo = uuid.uuid4().hex + '_' + secure_filename(photo.filename)
-        chemin = os.path.join(current_app.config['CHEMIN_VERS_AJOUTS'], nom_photo)
-        photo.save(chemin)
-        src = "/" + current_app.config['ROUTE_VERS_AJOUTS'] + "/" + nom_photo
-
     try:
         with bd.creer_connexion() as conn:
-            new_id = bd.ajout_service(conn, id_categorie, titre, description, localisation, actif, cout, id_proprietaire)
+            new_id = bd.ajout_service(conn, id_categorie, titre, description, localisation, actif, cout, id_proprietaire,image_nom)
     except Exception as e:
         print(f"Erreur lors de l'ajout de service: {e}")
         flash("Erreur lors de l'ajout du service en base de données.", "danger")
@@ -171,6 +169,7 @@ def edit_service(service_id):
                     "description": s["description"],
                     "actif": str(s["actif"]),
                     "cout": s["cout"],
+                    "photo" : s["nom_image"]
                 }
                 return render_template("services/service_edit.jinja", s=s, categories=cats, errors={}, form=form_data, locale=locale)
 
@@ -178,7 +177,11 @@ def edit_service(service_id):
             titre = (request.form.get("titre") or "").strip()
             localisation = (request.form.get("localisation") or "").strip()
             description = (request.form.get("description") or "").strip()
+            photo = (request.files.get("photo"))
             actif = 1 if (request.form.get("actif") or "1") == "1" else 0
+            ancien_photo = (request.form.get("ancien_photo"))
+            image_nom =""
+            
             try:
                 cout = float(request.form.get("cout") or 0)
             except ValueError:
@@ -187,6 +190,9 @@ def edit_service(service_id):
                 errors["titre"] = "Le titre est obligatoire (1 à 50 caractères)."
             if cout < 0:
                 errors["cout"] = "Le coût doit être un nombre positif."
+            image_nom = ancien_photo
+            if photo and photo.filename != "":
+                image_nom = enregistrer_image(photo)
 
             if errors:
                 form = {
@@ -195,10 +201,11 @@ def edit_service(service_id):
                     "description": description,
                     "actif": str(actif),
                     "cout": request.form.get("cout", ""),
+                    "photo" : image_nom
                 }
                 return render_template("services/service_edit.jinja", s=s, categories=cats, errors=errors, form=form, locale=locale), 400
 
-            bd.update_service(conn, service_id, titre, localisation, description, actif, cout)
+            bd.update_service_with_image(conn, service_id, titre, localisation, description, actif, cout,image_nom)
 
             flash("Service mis à jour.", "success")
             return redirect(url_for("service.service_detail", service_id=service_id), code=303)

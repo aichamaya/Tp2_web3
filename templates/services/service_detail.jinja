@@ -4,7 +4,7 @@
 {% block contenu %}
 <div class="row g-4">
   <div class="col-lg-7">
-    <img class="img-fluid rounded" src="/static/img/default_service.png" alt="Sport">
+    <img class="img-fluid rounded" src="{{ url_for('static', filename='images/ajouts/' ~ s.nom_image) }}" alt="Sport">
   </div>
   <div class="col-lg-5">
     <h1 class="h4">{{ s.titre }}</h1>
