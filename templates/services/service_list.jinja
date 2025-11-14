@@ -41,7 +41,32 @@
       {% if session.get("id_utilisateur") %}
         {% if s.id_utilisateur == session["id_utilisateur"] %}
           <a href="{{ url_for('service.edit_service', service_id=s.id_service) }}" class="btn btn-outline-primary mt-2 w-100">Modifier</a>
-          <a href="{{ url_for('service.supprimer_service', id_service=s.id_service) }}" class="btn btn-outline-danger mt-2 w-100">Supprimer</a>
+     
+          <button type="button" class="btn btn-outline-danger mt-2 w-100" 
+                  data-bs-toggle="modal" data-bs-target="#supprimerServiceModal{{ s.id_service }}">
+            Supprimer
+          </button>
+
+          <div class="modal fade" id="supprimerServiceModal{{ s.id_service }}" tabindex="-1" aria-labelledby="modalLabel{{ s.id_service }}" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalLabel{{ s.id_service }}">Confirmer la suppression</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                  Êtes-vous sûr(e) de vouloir supprimer le service "<strong>{{ s.titre }}</strong>" ?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                  <form action="{{ url_for('service.supprimer_service', id_service=s.id_service) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        
         {% elif s.actif %}
           <a href="{{ url_for('reservation.formulaire_reservation', id_service=s.id_service) }}" class="btn btn-outline-primary mt-2 w-100">Réserver</a>
         {% endif %}
