@@ -10,7 +10,7 @@ def creer_connexion():
         user="root",
         password="Maya2016",
         host="127.0.0.1",
-        database="services_particuliers1",
+        database="services_particuliers",
         raise_on_warnings=True,
        
     )

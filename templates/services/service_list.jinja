@@ -31,7 +31,7 @@
     {% set images_src = url_for('static', filename='images/' + s.nom_images) if s.nom_images else url_for('static', filename='images/default_service.png') %}
 
     <a href="{{ url_for('service.service_detail', service_id=s.id_service) }}">
-      <img class="card-img-top object-fit-cover" style="height: 200px;" src="{{ images_src }}" alt="{{ s.titre }}">
+      <img class="card-img-top object-fit-cover" style="height: 200px;" src="{{ url_for('static', filename='images/ajouts/' ~ s.nom_image) }}" alt="{{ s.titre }}">
     </a>
 
     <div class="card-body">
