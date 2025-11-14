@@ -107,13 +107,12 @@ def reserver_service(id_service):
 @bp_reservation.route("reservation/<int:id_service>")
 def formulaire_reservation(id_service):
     """formulaire de modifiction"""
-    # try:
+
     with bd.creer_connexion() as conn:
             s =bd.get_service_by_id(conn,id_service)
             if not s:
                 abort(404)
     return render_template("services/reservation.jinja", s=s)
-    # except Exception as e:
-        # abort(500)
+
  
  
