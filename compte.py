@@ -12,21 +12,19 @@ def hacher_mdp(mdp_en_clair):
 
 @bp_compte.route('/inscription', methods=["GET", "POST"])
 def inscription():
-
     if request.method == "POST":
-
         prenom = request.form.get("prenom", "").strip()
         nom = request.form.get("nom", "").strip()
-        courriel = request.form.get("courriel", "").strip()   
+        courriel = request.form.get("courriel", "").strip()
         mot_de_passe = request.form.get("mot_de_passe", "")
         confirmer_mdp = request.form.get("confirm_mot_de_passe", "")
 
-        erreurs = valider_compte(prenom,nom, courriel, mot_de_passe, confirmer_mdp)
 
-        if not erreurs: 
-            with bd.creer_connexion() as conn:
-                if bd.verifier_utilisateur_existe(conn, courriel):
-                    erreurs["courriel"] = "Ce courriel est déjà utilisé."
+        erreurs = valider_compte(prenom, nom, courriel, mot_de_passe, confirmer_mdp)
+
+        with bd.creer_connexion() as conn:
+            if bd.verifier_utilisateur_existe(conn, courriel):
+                erreurs["courriel"] = "Ce courriel est déjà utilisé."
 
         if erreurs:
             return render_template(
@@ -34,19 +32,17 @@ def inscription():
                 titre="Créer un compte",
                 erreurs=erreurs,
                 compte={"prenom": prenom, "nom": nom, "courriel": courriel}
-            ),       
-                    
-   
+            )
+
         mdp_hache = hacher_mdp(mot_de_passe)
 
-        with bd.creer_connexion() as conn:
-            bd.ajout_utilisateur(
-                conn, prenom,nom,courriel,mdp_hache
-                )
 
-        flash("Compte créé avec succès. Vous pouvez maintenant vous connecter.", "success")    
-        return redirect(url_for("services_list"))
-    
+        with bd.creer_connexion() as conn:
+            bd.ajout_utilisateur(conn, nom, prenom, courriel, mdp_hache)
+
+        flash("Compte créé avec succès.", "success")
+        return redirect(url_for("compte.liste_utilisateurs"))
+
     return render_template(
         'compte/inscription.jinja',
         titre="Créer un compte",
@@ -54,15 +50,10 @@ def inscription():
         erreurs={}
     )
 
-
 @bp_compte.route("/connexion", methods=["GET", "POST"])
 def connexion():
     """Gère la connexion de l'utilisateur."""
-    
-    # if session.get("id_utilisateur"):
-    #     flash("Vous êtes déjà connecté.", "info")
-    #     return redirect(url_for("service.home"))
-
+   
     if request.method == "POST":
         courriel = (request.form.get("courriel") or "").strip()
         mot_de_passe = request.form.get("mot_de_passe", "").strip() 
@@ -89,6 +80,7 @@ def connexion():
                 return render_template("compte/connexion.jinja")
     return render_template("compte/connexion.jinja")
 
+
 @bp_compte.route("/deconnexion")
 def deconnexion():
     """Gère la déconnexion de l'utilisateur ."""
@@ -96,8 +88,8 @@ def deconnexion():
     flash("Vous avez été déconnecté.", "info")
     return redirect(url_for("service.home"), 302)
 
-@bp_compte.route("/supprimer/<int:user_id>", methods=["POST"])
-def supprimer_compte(user_id):
+@bp_compte.route("/supprimer/<int:id_utilisateur>", methods=["POST"])
+def supprimer_compte(id_utilisateur):
     """Suppression du compte."""
    
     id_session = session.get("id_utilisateur")
@@ -106,25 +98,24 @@ def supprimer_compte(user_id):
         return redirect(url_for("compte.connexion"))
         
    
-    if id_session != user_id and session.get("role") != "admin":
+    if id_session != id_utilisateur and session.get("role") != "admin":
         abort(403)  
     try:
         with bd.creer_connexion() as conn:
-            lignes_supprimees = bd.supprimer_utilisateur(conn, user_id) 
+            lignes_supprimees = bd.supprimer_utilisateur(conn, id_utilisateur) 
             
         if lignes_supprimees == 0:
             flash("Erreur: Compte non trouvé ou déjà supprimé.", "danger")
             return redirect(url_for("service.home"))     
-        # if id_session == user_id:
-        #     session.clear()
-        #     flash("Votre compte a été supprimé avec succès. Au revoir.", "success")
         else:
-            flash(f"Le compte utilisateur ID:{user_id} a été supprimé.", "success")
+            flash(f"Le compte utilisateur a été supprimé.", "success")
             
     except Exception: 
         flash("Erreur lors de la suppression du compte.", "danger")
         
-    return redirect(url_for("service.home")) 
+    return redirect(url_for("compte.liste_utilisateurs")) 
+
+
 
 @bp_compte.route("/utilisateurs")
 def liste_utilisateurs():

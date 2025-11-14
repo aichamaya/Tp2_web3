@@ -8,9 +8,10 @@ def creer_connexion():
     """Crée une connexion MySQL et commit/rollback automatiquement."""
     conn = mysql.connector.connect(
         user="root",
-        password="Maya2016",
+        password="abcdef",
+        port=3307,
         host="127.0.0.1",
-        database="services_particuliers",
+        database="services_particuliers1",
         raise_on_warnings=True,
        
     )
@@ -71,22 +72,23 @@ def authentifier(conn, courriel, mdp):
         return curseur.fetchone()
 
 
-def ajout_utilisateur(conn, prenom, nom, courriel, mot_de_passe_hache):
+def ajout_utilisateur(conn, nom, prenom, courriel, mot_de_passe_hache):
     """ajoute un utilisateur"""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            INSERT INTO utilisateurs (prenom, nom, courriel, mot_de_passe, credit,role)
-            VALUES (
+            INSERT INTO utilisateurs ( nom, prenom, courriel, mot_de_passe, credit,role)
+            VALUES (         
+            %(nom)s,
             %(prenom)s, 
-            %(nom)s, 
             %(courriel)s, 
             %(mot_de_passe)s, 
-             0, 0,"admin")
+             0, "utiisateur")
             """,
             {
-                'prenom': prenom,
+            
                 'nom': nom,
+                'prenom': prenom,
                 'courriel': courriel,
                 'mot_de_passe':  mot_de_passe_hache       
             }

@@ -1,3 +1,4 @@
+
 {% extends "base.jinja" %}
 
 {% block contenu %}
@@ -9,7 +10,6 @@
             <thead class="table-dark">
                 <tr>
                     <th>Identifiant</th>
-                    <th>Prénom </th>
                     <th>Nom </th>
                     <th>Courriel</th>
                     <th>Crédit</th>
@@ -17,60 +17,61 @@
                 </tr>
             </thead>
             <tbody>
-                {% if utilisateur %}
-                {% for utilisateur in utilisateurs %}
-                <tr>
-                    <td>{{ utilisateur.id_utilisateur }}</td>
-                    <td>{{ utilisateur.prenom_utilisateur }}</td>
-                    <td>{{ utilisateur.nom_utilisateur }}</td>
-                    <td>{{ utilisateur.courriel }}</td>
-                    <td>{{ utilisateur.credit }} $</td>
-                    <td>
+                {% if utilisateurs %}
+                    {% for utilisateur in utilisateurs %}
+                    
+                     <tr>
+                        <td>{{ utilisateur.id_utilisateur }}</td>
+                        <td>{{ utilisateur.prenom }} {{ utilisateur.nom }}</td>
+                        <td>{{ utilisateur.courriel }}</td>
+                        <td>{{ utilisateur.credit }} $</td>
+                        <td>
 
-                        <form
-                            action="{{ url_for('compte.supprimer_compte', id_utilisateur=utilisateur.id_utilisateur) }}"
-                            method="POST" style="display: inline;">
-                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                data-bs-target="#confirmDeleteModal{{ utilisateur.id_utilisateur }}">
-                                Supprimer
-                            </button>
-                            <div class="modal fade" id="confirmDeleteModal{{ utilisateur.id_utilisateur }}"
+                            <form
+                                action="{{ url_for('compte.supprimer_compte', id_utilisateur=utilisateur.id_utilisateur) }}"
+                                method="POST" style="display: inline;">
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteModal{{ utilisateur.id_utilisateur }}">
+                                    Supprimer
+                                </button>
+
+                                <div class="modal fade" id="confirmDeleteModal{{ utilisateur.id_utilisateur }}"
                                 tabindex="-1" aria-labelledby="confirmDeleteLabel{{ utilisateur.id_utilisateur }}"
                                 aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title"
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title"
                                                 id="confirmDeleteLabel{{ utilisateur.id_utilisateur }}">Confirmation de
                                                 suppression</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
+                                            </div>
+                                            <div class="modal-body">
                                             Voulez-vous vraiment supprimer cet utilisateur ?<strong>{{
                                                 utilisateur.prenom_utilisateur }}
                                                 {{utilisateur.nom_utilisateur }}</strong>
-                                            <br>
-                                            <span class="text-danger">Attention ! Suppression en cours!</span>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
+                                                <br>
+                                                <span class="text-danger">Attention ! Suppression en cours!</span>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Annuler</button>
-                                            <form
+                                                <form
                                                 action="{{ url_for('compte.supprimer_compte', id_utilisateur=utilisateur.id_utilisateur) }}"
                                                 method="POST" style="display: inline;">
-                                                <button type="submit" class="btn btn-danger">Confirmer
-                                                </button>
-                                            </form>
+                                                    <button type="submit" class="btn btn-danger">Confirmer
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
 
-                    </td>
-                </tr>
-                {% endfor %}
+                        </td>
+                     </tr>
+                    {% endfor %}
                 {% else %}
                 <tr>
                     <td colspan="6" class="text-center">Aucun utilisateur</td>
@@ -81,4 +82,10 @@
         </table>
     </div>
 </div>
+<div class="text-end mt-3">
+        <a href="{{ url_for('compte.inscription') }}" class="btn btn-primary">
+            Ajouter un utilisateur
+        </a>
+</div>
 {% endblock %}
+
