@@ -10,12 +10,6 @@
   <div class="col-md-3">
     <select class="form-select" name="categorie">
       <option value="">Catégorie</option>
-      {# {% for c in categories %}
-      <option value="{{ c.id_categorie }}" {%"selected" if request.args.get('categorie')==(c.id_categorie|string)
-        else '' %}></option>
-
-      {{ c.nom_categorie }}
-      {% endfor %}#}
       </option>
     </select>
   </div>
@@ -32,25 +26,31 @@
   {% if services %}
   {% for s in services %}
   <div class="col-md-4">
-    <div class="card h-100">
+  <div class="card h-100">
 
+    {% set images_src = url_for('static', filename='images/' + s.nom_images) if s.nom_images else url_for('static', filename='images/default_service.png') %}
 
-      {% set images_src = url_for('static', filename='images/' + s.nom_images) if s.nom_images else url_for('static',
-      filename='images/default_service.png') %}
+    <a href="{{ url_for('service.service_detail', service_id=s.id_service) }}">
       <img class="card-img-top object-fit-cover" style="height: 200px;" src="{{ images_src }}" alt="{{ s.titre }}">
-      <div class="card-body">
-        <h5 class="card-title mb-1">{{ s.titre }}</h5>
-        <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
-        {# <a class="stretched-link" href="{{ url_for('service.service_detail', service_id=s.id_service) }}"></a> #}
-      </div>
-      {% if session.get("id_utilisateur") and s.actif and s.id_utilisateur != session["id_utilisateur"] %}
-      <a href="{{ url_for('reservation.formulaire_reservation', id_service=s.id_service) }}"
-        class="btn btn-outline-primary mt-2">
-        Réserver
-      </a>
+    </a>
+
+    <div class="card-body">
+      <h5 class="card-title mb-1">{{ s.titre }}</h5>
+      <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
+
+      {% if session.get("id_utilisateur") %}
+        {% if s.id_utilisateur == session["id_utilisateur"] %}
+          <a href="{{ url_for('service.edit_service', service_id=s.id_service) }}" class="btn btn-outline-primary mt-2 w-100">Modifier</a>
+          <a href="{{ url_for('service.supprimer_service', id_service=s.id_service) }}" class="btn btn-outline-danger mt-2 w-100">Supprimer</a>
+        {% elif s.actif %}
+          <a href="{{ url_for('reservation.formulaire_reservation', id_service=s.id_service) }}" class="btn btn-outline-primary mt-2 w-100">Réserver</a>
+        {% endif %}
       {% endif %}
+
     </div>
   </div>
+</div>
+
   {% endfor %}
   {% else %}
   <p class="text-muted">Aucun service trouvé.</p>

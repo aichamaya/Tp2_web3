@@ -45,15 +45,33 @@ def services_list():
 
 @bp_service.route("/<int:id_service>/supprimer", methods=["POST", "GET"])
 def supprimer_service(id_service):
-    """Vérifie si l'utilisateur est un admin"""
-    if not session.get('est_admin', False):       
-        flash("Accès refusé !", "danger")
+    """Supprime un service si l'utilisateur est admin ou le créateur."""
+    if "id_utilisateur" not in session:
+        flash("Vous devez être connecté pour supprimer un service.", "warning")
+        return redirect(url_for('compte.connexion'))
+
+    try:
+        with bd.creer_connexion() as conn:
+            s = bd.get_service_by_id(conn, id_service)
+            if not s:
+                abort(404)
+            
+            # Vérifie si l'utilisateur est admin ou propriétaire
+            if not session.get('est_admin', False) and s["id_utilisateur"] != session["id_utilisateur"]:
+                flash("Vous n'êtes pas autorisé à supprimer ce service.", "danger")
+                return redirect(url_for('service.services_list'))
+
+            bd.supprimer_service(conn, id_service) 
+
+        flash("Le service a été supprimé !", "success")
         return redirect(url_for('service.services_list'))
-    with bd.creer_connexion() as conn:
-        bd.supprimer_service(conn, id_service) 
-    flash("Le service a été supprimé !", "success")
-    return redirect(url_for('service.services_list'))
-     
+
+    except Exception as e:
+        print(f"Erreur lors de la suppression du service : {e}")
+        flash("Erreur lors de la suppression du service.", "danger")
+        return redirect(url_for('service.services_list'))
+
+ 
 @bp_service.route("/services/<int:service_id>")
 def service_detail(service_id):
     """Détail d'un service."""
