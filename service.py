@@ -79,7 +79,7 @@ def publish():
     #     flash("Vous devez être connecté pour publier un service.", "warning")
     #     return redirect(url_for("compte.connexion"))
 
-    id_proprietaire = session["user_id"]
+    id_proprietaire = session["id_utilisateur"]
     locale = request.cookies.get("local", "fr_CA")
 
     if request.method == "GET":
@@ -142,11 +142,11 @@ def publish():
 @bp_service.route("/services/<int:service_id>/edit", methods=["GET", "POST"])
 def edit_service(service_id):
     """Édition d'un service ."""
-    if "user_id" not in session:
+    if "id_utilisateur" not in session:
         flash("Vous devez être connecté pour modifier un service.", "warning")
         return redirect(url_for("compte.connexion"))
 
-    # id_utilisateur_session = session["user_id"]
+  
     locale = request.cookies.get("local", "fr_CA")
     s ={}
     cats = {}
@@ -160,8 +160,8 @@ def edit_service(service_id):
 
             if s["id_utilisateur"] != session.get("id_utilisateur"):
                 flash("Vous n'êtes pas autorisé à modifier ce service.", "danger")
-                # abort(403)
-                return redirect(url_for("services/service_edit"), code = 403 )  
+                abort(403)
+                
             cats = bd.get_categories(conn)
 
             if request.method == "GET":
@@ -206,7 +206,7 @@ def edit_service(service_id):
     except Exception as e:
         print(f"Erreur d'édition de service: {e}")
         flash("Erreur lors de la mise à jour du service en base de données.", "danger")
-    return render_template("services/service_edit.jinja", s=s, categories=cats, errors=errors, form=form, locale=locale)
+        return render_template("services/service_edit.jinja", s=s, categories=cats, errors=errors, form=form, locale=locale)
 
     
 def enregistrer_image(photo):

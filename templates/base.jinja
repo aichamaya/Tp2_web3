@@ -33,7 +33,7 @@
         </ul>
         <div>
         
-        {% if id_utilisateur in session %}       
+        {% if  session.get("id_utilisateur")  %}       
           <span class="text-white me-2 small">Connecté : <strong>{{ session.courriel }}</strong></span>
           <a href="{{ url_for('compte.deconnexion') }}" class="btn btn-outline-light">Déconnexion</a>
         {% else %}
