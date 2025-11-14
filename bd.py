@@ -232,24 +232,35 @@ def supprimer_service(conn, id_service):
 
 
 
-def ajout_reservation(conn, id_service, id_utilisateur, date_reservation, date_souhaitee,cout_paye):
+def ajout_reservation(conn, id_service, id_utilisateur, date_reservation, date_souhaitee):
     """Insère la réservation et met à jour les crédits (réservation payante)."""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
             INSERT INTO reservations (id_service, id_utilisateur, date_reservation, date_souhaitee)
-            VALUES (%s, %s, %s, %s)
+            VALUES (
+            %(id_service)s, 
+            %(id_utilisateur)s, 
+            %(date_reservation)s, 
+            %(date_souhaitee)s)
             """,
-            (id_service, id_utilisateur,date_reservation, date_souhaitee),
+            {
+                'id_service': id_service,
+                'id_utilisateur' :id_utilisateur ,
+                'date_reservation' : date_reservation,
+                'date_souhaitee': date_souhaitee
+                },
         )
 
    
-    update_credit_utilisateur(conn, id_utilisateur, get_credit_utilisateur(conn, id_utilisateur) - cout_paye)
-
     service = get_service_by_id(conn, id_service)
-    if service:
-        id_proprietaire = service["id_utilisateur"]
-        update_credit_utilisateur(conn, id_proprietaire, get_credit_utilisateur(conn, id_proprietaire) + cout_paye)
+    cout_service = service.get("cout", 0) if service else 0
+
+    if cout_service > 0:
+        update_credit_utilisateur(conn, id_utilisateur, get_credit_utilisateur(conn, id_utilisateur) - cout_service)
+        if service:
+            id_proprietaire = service["id_utilisateur"]
+            update_credit_utilisateur(conn, id_proprietaire, get_credit_utilisateur(conn, id_proprietaire) + cout_service)
 
     return True
 

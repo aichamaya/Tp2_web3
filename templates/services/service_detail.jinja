@@ -16,8 +16,6 @@
       <li><strong>Date d’ajout :</strong> {{ s.date_creation }}</li>
       <li><strong>Statut :</strong> {{ 'Actif' if s.actif==1 else 'Inactif' }}</li>
     </ul>
-
-    <a class="btn btn-primary" href="{{url_for('service.edit_service',service_id= s.id_service)}}">Modifier</a>
     <a class="btn btn-outline-secondary" href="/services">Retour</a>
 
   </div>
