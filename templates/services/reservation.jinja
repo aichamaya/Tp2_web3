@@ -1,0 +1,36 @@
+{% extends "base.jinja" %}
+ 
+{% block contenu %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<div class="container mt-4">
+    <h3 class="text-center mb-4">Choisir une date et une heure</h3>
+ 
+    <div class="d-flex justify-content-center">
+        <form action="{{ url_for('reservation.reserver_service', id_service=s.id_service) }}" method="POST"
+            novalidate style="width: 100%; max-width: 400px;">
+            <div class="mb-3">
+                <label for="date" class="form-label">Date</label>
+                <input type="date" name="date" id="date" class="form-control {{ class_date }}" value="{{ date_choisi }}"
+                    required>
+                <div class="invalid-feedback">Ne doit pas être vide</div>
+            </div>
+ 
+            <div class="mb-3">
+                <label for="heure" class="form-label">Heure</label>
+                <input type="time" name="heure" id="heure" class="form-control {{ class_heure }}"
+                    value="{{ heure_choisi }}" step="60">
+                <div class="invalid-feedback">Ne doit pas être vide</div>
+            </div>
+ 
+            <button type="submit" class="btn btn-primary">Réserver</button>
+        </form>
+    </div>
+</div>
+ 
+{% endblock %}

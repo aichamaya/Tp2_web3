@@ -16,7 +16,7 @@
     </div>
   </div>
   <div class="col-lg-5">
-    <img class="img-fluid rounded-3 h-100 object-fit-cover" src="" alt="Sport">
+    <img class="img-fluid rounded-3 h-100 object-fit-cover" src="/static/images/default_service.png" alt="Sport">
 
   </div>
 </div>
@@ -55,6 +55,7 @@
 
       </div>
       <a class="btn btn-primary" href="{{ url_for('service.service_detail', service_id=s.id_service) }}">Détail</a>
+      {# <a class="btn btn-primary" href="{{ url_for('reservation.reserver_service', service_id=s.id_service) }}">Réservation</a> #}
     </div>
   </div>
   {% else %}

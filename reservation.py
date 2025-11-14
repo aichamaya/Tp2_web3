@@ -11,7 +11,7 @@ def liste_reservations():
         flash("Vous devez être connecté pour voir vos réservations.", "warning")
         return redirect(url_for("compte.connexion"))
 
-    id_utilisateur = session["user_id"]
+    id_utilisateur = session["id_utilisateur"]
     locale = request.cookies.get("local", "fr_CA")
 
     with bd.creer_connexion() as conn:
@@ -20,15 +20,6 @@ def liste_reservations():
 
     devise = "USD" if locale == "en_US" else "CAD"
 
-    def format_reservation(r):
-        r["date_souhaitee_formattee"] = dates.format_date(r["date_souhaitee"], format="full", locale=locale)
-        r["date_reservation_formattee"] = dates.format_datetime(r["date_reservation"], format="short", locale=locale)
-        r["cout_paye_formatte"] = numbers.format_currency(r["cout_paye"], devise, locale=locale)
-        return r
-
-    reservations_faites = [format_reservation(r) for r in reservations_faites]
-    reservations_recues = [format_reservation(r) for r in reservations_recues]
-
     return render_template(
         "reservation_list.jinja",
         reservations_faites=reservations_faites,
@@ -36,39 +27,38 @@ def liste_reservations():
         locale=locale,
     )
 
-@bp_reservation.route("reservation/reserver", methods=["POST"])
-def reserver_service():
+@bp_reservation.route("reservation/<int:id_service>", methods=["POST"])
+def reserver_service(id_service):
     """Soumettre une réservation."""
     if not session.get("id_utilisateur"):
         flash("Vous devez être connecté pour réserver un service.", "warning")
-        service_id = request.form.get("id_service")
-        return redirect(url_for("service.service_detail", service_id=service_id))
-
+        abort(401)
     id_utilisateur = session["id_utilisateur"]
-    service_id = request.form.get("id_service", type=int)
-    date_souhaitee_str = request.form.get("date_souhaitee")
+    date_choisir =""
+    heure_choisir=""
 
     errors = {}
-
+    date_choisir = request.form.get("date")
+    heure_choisir = request.form.get("heure")
     with bd.creer_connexion() as conn:
-        service = bd.get_service_by_id(conn, service_id)
+        s= bd.get_service_by_id(conn, id_service)
         credit_utilisateur = bd.get_credit_utilisateur(conn, id_utilisateur)
+        if bd.service_a_deja_ete_reserve(conn,id_service, date_choisir,heure_choisir):
+            flash("Desolée ce service est déja reservé pour cette date")
+            return render_template("services/reservation.jinja", date_choisir=date_choisir, heure_choisir=heure_choisir, s=s)
+        
 
-    if not service:
+    if not s:
         abort(404)
-
-    if service["id_utilisateur"] == id_utilisateur:
+    if s["id_utilisateur"] == id_utilisateur:
         flash("Vous ne pouvez pas réserver votre propre service.", "danger")
-        return redirect(url_for("service.service_detail", service_id=service_id))
+        return redirect(url_for("service.service_detail", service_id=id_service))
 
-    cout_service = service.get("cout") or 0.0
-
-    try:
-        date_souhaitee = datetime.strptime(date_souhaitee_str, "%Y-%m-%d").date()
-        if date_souhaitee < date.today():
-            errors["date_souhaitee"] = "La date souhaitée ne peut pas être dans le passé."
-    except ValueError:
-        errors["date_souhaitee"] = "Format de date invalide."
+    cout_service = s.get("cout") or 0.0
+    if not heure_choisir  :
+        errors["heure_choisir"] ="veuillez choisir une heure svp"
+    if not date_choisir :
+        errors["date_choisir"] = "Veuillez choisir uen date svp"
 
     if cout_service > 0 and credit_utilisateur < cout_service:
         errors["credit"] = f"Crédit insuffisant. Il vous faut {cout_service} crédits, vous avez {credit_utilisateur}."
@@ -76,15 +66,27 @@ def reserver_service():
     if errors:
         for error in errors.values():
             flash(error, "danger")
-        return redirect(url_for("service.service_detail", service_id=service_id))
+        return redirect(url_for("service.service_detail", service_id=id_service))
 
     try:
         with bd.creer_connexion() as conn:
-            bd.ajout_reservation(conn, service_id, id_utilisateur, datetime.now(), date_souhaitee, cout_service)
+            bd.ajout_reservation(conn, id_service, id_utilisateur,  date_choisir, heure_choisir, cout_service)
     except Exception as e:
         print(f"Erreur lors de la réservation et/ou de la transaction: {e}")
         flash("Une erreur est survenue lors de la tentative de réservation.", "danger")
-        return redirect(url_for("service.service_detail", service_id=service_id))
+        return redirect(url_for("service.service_detail", service_id=id_service))
 
-    flash(f"Réservation de '{service['titre']}' pour le {date_souhaitee_str} confirmée!", "success")
+    flash(f"Réservation de '{s['titre']}' pour le {date_choisir} confirmée!", "success")
     return redirect(url_for(".liste_reservations"), code=303)
+
+@bp_reservation.route("reservation/<int:id_service>")
+def formulaire_reservation(id_service):
+    """formulaire de modifiction"""
+    # try:
+    with bd.creer_connexion() as conn:
+            s =bd.get_service_by_id(conn,id_service)
+            if not s:
+                abort(404)
+    return render_template("services/reservation.jinja", s=s) 
+    # except Exception as e:
+        # abort(500)

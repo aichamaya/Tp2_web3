@@ -104,7 +104,9 @@ def get_credit_utilisateur(conn, id_utilisateur: int):
     """avoir un credit"""
     with conn.get_curseur() as curseur:
         curseur.execute("SELECT credit FROM utilisateurs WHERE id_utilisateur = %s", (id_utilisateur,))
-        return curseur.fetchone()
+        resultat = curseur.fetchone()
+        return resultat["credit"] if resultat else 0
+
                
 def update_credit_utilisateur(conn, id_utilisateur: int, nouveau_credit: float):
     """mise à jour du compte de credit"""
@@ -229,15 +231,15 @@ def supprimer_service(conn, id_service):
 
 
 
-def ajout_reservation(conn, id_service, id_utilisateur, date_reservation, date_souhaitee, cout_paye):
+def ajout_reservation(conn, id_service, id_utilisateur, date_reservation, date_souhaitee,cout_paye):
     """Insère la réservation et met à jour les crédits (réservation payante)."""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            INSERT INTO reservations (id_service, id_utilisateur, date_reservation, date_souhaitee, cout_paye)
-            VALUES (%s, %s, NOW(), %s, %s)
+            INSERT INTO reservations (id_service, id_utilisateur, date_reservation, date_souhaitee)
+            VALUES (%s, %s, %s, %s)
             """,
-            (id_service, id_utilisateur, date_souhaitee, cout_paye),
+            (id_service, id_utilisateur,date_reservation, date_souhaitee),
         )
 
    
@@ -281,6 +283,13 @@ def get_reservations_for_owner(conn, id_proprietaire: int):
             (id_proprietaire,),
         )
         return curseur.fetchall()
+    
+def service_a_deja_ete_reserve(conn, id_service, date, heure):
+    """verifie si le a été reservè ou pas"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("SELECT COUNT(*) AS total FROM reservations WHERE id_service = %s and date_reservation = %s and date_souhaitee = %s", (id_service, date, heure,))
+        result = curseur.fetchone()
+        return result["total"] > 0
 
 def obtenir_les_utilisateurs(conn):
     """permet d'obtenir la liste des utilisateurs"""

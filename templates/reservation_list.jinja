@@ -34,7 +34,7 @@
                     <p class="card-text small text-muted">
                         Réservé le : {{ r.date_reservation_formattee }}
                     </p>
-                    <a href="{{ url_for('service.service_detail_qs', service_id=r.id_service) }}" class="stretched-link">Voir le service</a>
+                    <a href="{{ url_for('service.service_detail', service_id=r.id_service) }}" class="stretched-link">Voir le service</a>
                 </div>
             </div>
         </div>
