@@ -25,7 +25,7 @@ def load_user():
             "credit": session.get("credit"),
         }
 
-app.register_blueprint(bp_service, url_prefix="/")
+app.register_blueprint(bp_service, url_prefix="/service")
 app.register_blueprint(bp_reservation, url_prefix="/reservation")
 app.register_blueprint(bp_compte, url_prefix="/compte")
 
