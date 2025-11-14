@@ -39,7 +39,7 @@
       <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
 
       {% if session.get("id_utilisateur") %}
-        {% if s.id_utilisateur == session["id_utilisateur"] %}
+        {% if s.id_utilisateur == session["id_utilisateur"] or  session["role"] == "admin"  %}
           <a href="{{ url_for('service.edit_service', service_id=s.id_service) }}" class="btn btn-outline-primary mt-2 w-100">Modifier</a>
      
           <button type="button" class="btn btn-outline-danger mt-2 w-100" 
@@ -67,7 +67,7 @@
             </div>
           </div>
         
-        {% elif s.actif %}
+          {% elif s.actif %}
           <a href="{{ url_for('reservation.formulaire_reservation', id_service=s.id_service) }}" class="btn btn-outline-primary mt-2 w-100">Réserver</a>
         {% endif %}
       {% endif %}
