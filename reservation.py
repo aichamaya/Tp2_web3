@@ -92,7 +92,9 @@ def reserver_service(id_service):
 
         # Ajouter la réservation
         try:
-            bd.ajout_reservation(conn, id_service, id_utilisateur, date_choisir_obj, heure_choisir_obj)
+            bd.ajout_reservation(conn, id_service, id_utilisateur, 
+                                 date_choisir_obj.strftime("%Y-%m-%d"),
+                                    heure_choisir_obj.strftime("%H:%M:%S"))
         except Exception as e:
             print(f"Erreur lors de la réservation et/ou de la transaction: {e}")
             flash("Une erreur est survenue lors de la tentative de réservation.", "danger")
