@@ -10,7 +10,7 @@ def creer_connexion():
         user="root",
         password="Maya2016",
         host="127.0.0.1",
-        database="services_particuliers",
+        database="services_particuliers1",
         raise_on_warnings=True,
        
     )
@@ -265,14 +265,13 @@ def ajout_reservation(conn, id_service, id_utilisateur, date_reservation, date_s
     return True
 
 def get_reservations_by_user(conn, id_utilisateur: int):
-    """reservetion par un utilisateur"""
+    """reservation par un utilisateur"""
     with conn.get_curseur() as curseur:
         curseur.execute(
             """
-            SELECT r.*, s.titre, s.cout, u.courriel AS courriel_proprietaire
-            FROM reservations r
-            JOIN services s ON r.id_service = s.id_service
-            JOIN utilisateurs u ON s.id_utilisateur = u.id_utilisateur
+            SELECT * 
+            FROM reservations r     
+            JOIN utilisateurs u ON r.id_utilisateur = u.id_utilisateur
             WHERE r.id_utilisateur = %s
             ORDER BY r.date_souhaitee DESC
             """,

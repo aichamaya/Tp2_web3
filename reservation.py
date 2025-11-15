@@ -4,7 +4,7 @@ from babel import dates, numbers
 import bd
 bp_reservation = Blueprint("reservation", __name__)
  
-@bp_reservation.route("reservation/", methods=["GET"])
+@bp_reservation.route("/mes_reservation", methods=["GET"])
 def liste_reservations():
     """Affiche les réservations faites et reçues."""
     if not session:
@@ -19,6 +19,10 @@ def liste_reservations():
         reservations_recues = bd.get_reservations_for_owner(conn, id_utilisateur)
  
     devise = "USD" if locale == "en_US" else "CAD"
+    print("FAITES:", reservations_faites)
+    print("RECUES:", reservations_recues)
+    print("Session:", session)
+
  
     return render_template(
         "reservation_list.jinja",
