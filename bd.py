@@ -1,17 +1,17 @@
+import os
 import types
 import contextlib
-import hashlib
 import mysql.connector
 
 @contextlib.contextmanager
 def creer_connexion():
     """Crée une connexion MySQL et commit/rollback automatiquement."""
     conn = mysql.connector.connect(
-        user="root",
-        password="Maya2016",
-        host="127.0.0.1",
-        database="services_particuliers1",
-        raise_on_warnings=True,
+       user=os.getenv('BD_UTILISATEUR'),
+        password=os.getenv('BD_MDP'),
+        host=os.getenv('BD_SERVEUR'),
+        database=os.getenv('BD_NOM_SCHEMA'),
+        raise_on_warnings=True
        
     )
    

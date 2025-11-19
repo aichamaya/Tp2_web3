@@ -4,12 +4,19 @@ from service import bp_service
 from reservation import bp_reservation
 from compte import bp_compte
 import os
+import logging
+import dotenv 
+
+if not os.getenv('BD_UTILISATEUR'):
+    dotenv.load_dotenv('.env')
 
 app = Flask(__name__)
+app.logger.setLevel(logging.DEBUG)
 app.config['CHEMIN_VERS_AJOUTS'] = os.path.join('static', 'images', 'ajouts')
 os.makedirs(app.config['CHEMIN_VERS_AJOUTS'], exist_ok=True)
 app.config["SECRET_KEY"] = "TP_CLE_SECRETE_TRES_SECURITAIRE"
 app.config["BABEL_DEFAULT_LOCALE"] = "fr_CA"
+app.secret_key = os.getenv('SECRET_SESSION')
 babel = Babel(app)
 
 
