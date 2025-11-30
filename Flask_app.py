@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, make_response, session,url_for,g
+from flask import Flask, render_template, request, redirect, make_response, session,url_for,g,  jsonify
 from flask_babel import Babel
 from service import bp_service
 from reservation import bp_reservation
 from compte import bp_compte
+from api import bp_api
 import os
 import logging
 import dotenv 
@@ -14,9 +15,9 @@ app = Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
 app.config['CHEMIN_VERS_AJOUTS'] = os.path.join('static', 'images', 'ajouts')
 os.makedirs(app.config['CHEMIN_VERS_AJOUTS'], exist_ok=True)
-app.config["SECRET_KEY"] = "1fe68a0f669e215cc93bb37dc928fad927a58d868f0401d8be4715c2d0de931a"
+# app.config["SECRET_KEY"] = "1fe68a0f669e215cc93bb37dc928fad927a58d868f0401d8be4715c2d0de931a"
 app.config["BABEL_DEFAULT_LOCALE"] = "fr_CA"
-app.secret_key = os.getenv('SECRET_SESSION')
+app.secret_key = os.getenv('SECRET_KEY')
 babel = Babel(app)
 
 
@@ -35,6 +36,7 @@ def load_user():
 app.register_blueprint(bp_service, url_prefix="/")
 app.register_blueprint(bp_reservation, url_prefix="/reservation")
 app.register_blueprint(bp_compte, url_prefix="/compte")
+app.register_blueprint(bp_api, url_prefix="/api")
 
 @app.route("/")
 def home():
