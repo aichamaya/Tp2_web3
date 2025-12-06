@@ -30,18 +30,18 @@ def services_list():
     """Liste des services avec filtres."""
     locale = request.cookies.get("local", "fr_CA")
     q = (request.args.get("q") or "").strip()
-    categorie = request.args.get("categorie")
-    localisation = (request.args.get("localisation") or "").strip()
+    # categorie = request.args.get("categorie")
+    # localisation = (request.args.get("localisation") or "").strip()
 
     try:
         with bd.creer_connexion() as conn:
-            cats = bd.get_categories(conn)
-            rows = bd.search_services(conn, q=q, categorie=categorie, localisation=localisation)
+            # cats = bd.get_categories(conn)
+            rows = bd.search_services(conn, q=q)
     except Exception as e:
         flash(f"Erreur de base de données lors de la recherche: {e}", "danger")
-        cats, rows = [], []
+        rows = []
 
-    return render_template("services/service_list.jinja", services=rows, categories=cats, locale=locale)
+    return render_template("services/service_list.jinja", services=rows)
 
 @bp_service.route("/<int:id_service>/supprimer", methods=["POST", "GET"])
 def supprimer_service(id_service):

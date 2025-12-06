@@ -5,80 +5,8 @@
 <div class="container mt-3">
     <h2>Les utilisateurs</h2>
 
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nom </th>
-                    <th>Courriel</th>
-                    <th>Crédit</th>
-                    <th>Supprimer</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if utilisateurs %}
-                    {% for utilisateur in utilisateurs %}
-                    
-                     <tr>
-                        
-                        <td>{{ utilisateur.prenom }} {{ utilisateur.nom }}</td>
-                        <td>{{ utilisateur.courriel }}</td>
-                        <td>{{ utilisateur.credit }} $</td>
-                        <td>
-
-                            <form
-                                action="{{ url_for('compte.supprimer_compte', id_utilisateur=utilisateur.id_utilisateur) }}"
-                                method="POST" style="display: inline;">
-                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                    data-bs-target="#confirmDeleteModal{{ utilisateur.id_utilisateur }}">
-                                    Supprimer
-                                </button>
-
-                                <div class="modal fade" id="confirmDeleteModal{{ utilisateur.id_utilisateur }}"
-                                tabindex="-1" aria-labelledby="confirmDeleteLabel{{ utilisateur.id_utilisateur }}"
-                                aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title"
-                                                id="confirmDeleteLabel{{ utilisateur.id_utilisateur }}">Confirmation de
-                                                suppression</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                            Voulez-vous vraiment supprimer cet utilisateur ?<strong>{{
-                                                utilisateur.prenom_utilisateur }}
-                                                {{utilisateur.nom_utilisateur }}</strong>
-                                                <br>
-                                                <span class="text-danger">Attention ! Suppression en cours!</span>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Annuler</button>
-                                                <form
-                                                action="{{ url_for('compte.supprimer_compte', id_utilisateur=utilisateur.id_utilisateur) }}"
-                                                method="POST" style="display: inline;">
-                                                    <button type="submit" class="btn btn-danger">Confirmer
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-
-                        </td>
-                     </tr>
-                    {% endfor %}
-                {% else %}
-                <tr>
-                    <td colspan="6" class="text-center">Aucun utilisateur</td>
-                </tr>
-
-                {% endif %}
-            </tbody>
-        </table>
+    <div class="table-responsive" id="tableau-utilisateurs">
+        
     </div>
 </div>
 <div class="text-end mt-3">

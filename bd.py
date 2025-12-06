@@ -131,7 +131,7 @@ def get_categories(conn):
         )
         return curseur.fetchall()
 
-def search_services(conn, q: str = "", categorie=None, localisation: str = ""):
+def search_services(conn, q: str = ""):
     """pour recherche un service"""
     sql = """
         SELECT s.*, c.nom_categorie
@@ -143,12 +143,6 @@ def search_services(conn, q: str = "", categorie=None, localisation: str = ""):
     if q:
         sql += " AND (s.titre LIKE %s OR s.description LIKE %s)"
         params += [f"%{q}%", f"%{q}%"]
-    if categorie:
-        sql += " AND s.id_categorie = %s"
-        params.append(categorie)
-    if localisation:
-        sql += " AND s.localisation LIKE %s"
-        params.append(f"%{localisation}%")
     sql += " ORDER BY s.date_creation DESC"
 
     with conn.get_curseur() as curseur:
@@ -228,7 +222,7 @@ def supprimer_service(conn, id_service):
             'DELETE FROM services WHERE id_service = %(id)s',
             {'id': id_service}
         )
-    conn.commit() 
+    return curseur.rowcount
 
 
 
@@ -311,3 +305,6 @@ def obtenir_les_utilisateurs(conn):
             
         """)
         return curseur.fetchall()
+    
+
+    
