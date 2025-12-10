@@ -11,13 +11,11 @@
       <div class="d-flex gap-2">
         <a class="btn btn-primary" href="{{ url_for('service.publish') }}">Proposer un service sportif</a>
         <a class="btn btn-outline-primary" href="{{ url_for('service.services_list') }}">Explorer les offres sport</a>
-
       </div>
     </div>
   </div>
   <div class="col-lg-5">
     <img class="img-fluid rounded-3 h-100 object-fit-cover" src="/static/images/default_service.png" alt="Sport">
-
   </div>
 </div>
 
@@ -43,26 +41,19 @@
 </div>
 
 <h2 class="h5 mb-3">Derniers services actifs</h2>
-<div class="row g-3">
-  {% for s in services %}
-  <div class="col-md-4">
-    <div class="card h-100">
-      <img class="card-img-top object-fit-cover" style="height: 200px;"
-        src="{{ url_for('static', filename='images/ajouts/' ~ s.nom_image) }}" alt="{{ s.titre }}">
-      <div class="card-body">
-        <h5 class="card-title mb-1">{{ s.titre }}</h5>
-        <div class="small text-muted">{{ s.nom_categorie }} • {{ s.localisation }}</div>
-
-      </div>
-      <a class="btn btn-primary" href="{{ url_for('service.service_detail', service_id=s.id_service) }}">Détail</a>
-      {# <a class="btn btn-primary" href="{{ url_for('reservation.reserver_service', service_id=s.id_service) }}">Réservation</a> #}
-    </div>
-  </div>
-  {% else %}
-  <p class="text-muted">Aucun service actif pour l’instant. <a href="{{ url_for('service.publish') }}">Publier le
-      premier</a> !</p>
-  {% endfor %}
+<div id="services-recents" class="row g-3 mb-5">
+ 
 </div>
 
+<h2 class="h5 mb-3">Tous les services</h2>
+<div id="liste-services" class="row g-3">
 
+</div>
+
+<p class="text-muted">
+  Aucun service actif pour l’instant. 
+  <a href="{{ url_for('service.publish') }}">Publier le premier</a> !
+</p>
+
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}

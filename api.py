@@ -8,7 +8,7 @@ bp_api = Blueprint('api', __name__)
 
 @bp_service.route("api/services")
 def services_list_api():
-    """Liste des services avec filtres."""
+    """Recherche des services par mot-clé."""
     q = (request.args.get("q") or "").strip().lower()
     try:
         with bd.creer_connexion() as conn:
@@ -18,6 +18,17 @@ def services_list_api():
 
     return jsonify(rows)
 
+# @bp_service.route("/api/services/search")
+# def api_services_recherche():
+#     """Recherche des services par mot-clé."""
+#     q = (request.args.get("q") or "").strip().lower()
+#     try:
+#         with bd.creer_connexion() as conn:
+#             rows = bd.search_services(conn, q=q)
+#     except Exception:
+#         rows = []
+#     return jsonify(code=200, services=rows)
+
 @bp_service.route("api/supprimer/service/<int:id_service>")
 def supprimer_service_api(id_service):
     """Supprime un service si l'utilisateur est admin ou le créateur."""
@@ -26,7 +37,7 @@ def supprimer_service_api(id_service):
     if "id_utilisateur" not in session:
         data = {
             "message": "Vous devez être connecté pour supprimer un service.",
-            "code": 401
+            "code": 404
         }
         return  jsonify(data)   
     try:
@@ -35,7 +46,7 @@ def supprimer_service_api(id_service):
             if not s:
                 data = {
                 "message": "service inexistant",
-                "code": 404
+                "code": 403
                 }
                 return jsonify(data)
               
@@ -132,3 +143,30 @@ def liste_utilisateurs_api():
         }  
 
     return jsonify(data)
+
+@bp_compte.route("api/verifier_courriel")
+def verifier_courriel():
+    courriel = request.args.get("courriel", "").strip().lower()
+    if not courriel:
+        return jsonify({"existe": False})
+
+    try:
+        with bd.creer_connexion() as conn:
+            utilisateur = bd.verifier_utilisateur_existe(conn, courriel)
+        return jsonify({"existe": utilisateur is not None})
+    except Exception as e:
+        return jsonify({"existe": False, "error": str(e)})
+    
+@bp_service.route("/api/services/recents")
+def api_services_recents():
+    """Retourne la liste complète des services."""
+    with bd.creer_connexion() as conn:
+        services = bd.get_service_all(conn)
+    return jsonify(code=200, services=services)
+
+@bp_service.route("/api/services")
+def api_services():
+    """Retourne les 5 derniers services ajoutés."""
+    with bd.creer_connexion() as conn:
+        services = bd.get_service_all(conn)
+    return jsonify(code=200, services=services)

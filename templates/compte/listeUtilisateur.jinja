@@ -1,18 +1,30 @@
-
 {% extends "base.jinja" %}
 
 {% block contenu %}
 <div class="container mt-3">
+   <div class="row mb-4">
+    <div class="col-md-6 position-relative">
+      <input class="form-control shadow-sm" type="search" id="recherche" autocomplete="off" aria-label="Recherche"
+        placeholder="🔍 Rechercher un utilisateur…">
+      <div id="chargement"
+        class="spinner-border text-primary d-none position-absolute top-50 end-0 translate-middle-y me-3"
+        style="width: 1rem; height: 1rem;">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <ul id="resultats-recherche"
+        class="list-group position-absolute top-100 start-0 w-100 z-3 d-none mt-1 shadow-sm"></ul>
+    </div>
+  </div>
     <h2>Les utilisateurs</h2>
 
     <div class="table-responsive" id="tableau-utilisateurs">
-        
+
     </div>
 </div>
+
 <div class="text-end mt-3">
-        <a href="{{ url_for('compte.inscription') }}" class="btn btn-primary">
-            Ajouter un utilisateur
-        </a>
+    <a href="{{ url_for('compte.inscription') }}" class="btn btn-primary">
+        Ajouter un utilisateur
+    </a>
 </div>
 {% endblock %}
-

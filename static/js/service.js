@@ -1,23 +1,19 @@
-/**
- * Pour faciliter les requêtes Ajax.
- */
-
-/* eslint-disable no-unused-vars */
-
+"use strict";
 
 /*global envoyerRequeteAjax*/
 
-"use strict";
-
 let controleur = null;
 
-const recherche = document.getElementById("recherche");
+
+const champRecherche = document.getElementById("recherche");
 const chargement = document.getElementById("chargement");
 const listeResultats = document.getElementById("resultats-recherche");
 
 async function rechercher() {
+    
+    if (!champRecherche || !listeResultats || !chargement) return;
 
-    const aChercher = recherche.value.trim();
+    const aChercher = champRecherche.value.trim();
 
     if (aChercher.length < 3) {
         listeResultats.classList.add("d-none");
@@ -55,6 +51,8 @@ async function rechercher() {
 }
 
 function afficherResultats(resultats) {
+    if (!listeResultats) return; 
+
     listeResultats.innerHTML = "";
 
     if (!resultats || resultats.length === 0) {
@@ -76,16 +74,19 @@ function afficherResultats(resultats) {
     listeResultats.classList.remove("d-none");
 }
 
-
-
-
 function initialisation() {
-    recherche.addEventListener("input", rechercher);
-    document.addEventListener("click", (e) => {
-        if (!listeResultats.contains(e.target) && e.target !== recherche) {
-            listeResultats.classList.add("d-none");
-        }
-    });
+    
+    if (champRecherche) {
+        champRecherche.addEventListener("input", rechercher);
+    }
+
+    if (listeResultats && champRecherche) {
+        document.addEventListener("click", (e) => {
+            if (!listeResultats.contains(e.target) && e.target !== champRecherche) {
+                listeResultats.classList.add("d-none");
+            }
+        });
+    }
 }
 
 window.addEventListener("load", initialisation);

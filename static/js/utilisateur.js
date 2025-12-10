@@ -4,12 +4,14 @@
 
 /* eslint-disable no-unused-vars */
 
-
 /*global envoyerRequeteAjax*/
 
 "use strict";
 
-async function supprimerUtilisateur(id_service) {
+
+async function supprimerUtilisateur(id_utilisateur) {
+    
+
     if (controleur) {
         controleur.abort();
     }
@@ -18,8 +20,8 @@ async function supprimerUtilisateur(id_service) {
 
     try {
         const resultat = await envoyerRequeteAjax(
-            `api/supprimer/utilisateur/${id_service}`,
-            "GET",
+            `api/supprimer/utilisateur/${id_utilisateur}`,
+            "DELETE",
             null,
             controleur
         );
@@ -44,11 +46,15 @@ async function afficherListeUtilisateur() {
 
         if (resultat.code === 200 && resultat.utilisateurs) {
             const utilisateurs = resultat.utilisateurs;
+            const champRecherche = document.getElementById("recherche");
+            const filtre = champRecherche ? champRecherche.value.trim().toLowerCase() : "";
+            const liste = filtre.length > 3
+                ? utilisateurs.filter(u => u.courriel.toLowerCase().includes(filtre))
+                : utilisateurs;
 
 
             let table = document.createElement("table");
             table.className = "table table-striped table-bordered";
-
 
             let thead = document.createElement("thead");
             thead.innerHTML = `
@@ -62,9 +68,8 @@ async function afficherListeUtilisateur() {
             `;
             table.appendChild(thead);
 
-
             let tbody = document.createElement("tbody");
-            utilisateurs.forEach(u => {
+            liste.forEach(u => {
                 let tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td>${u.nom}</td>
@@ -92,9 +97,64 @@ async function afficherListeUtilisateur() {
     }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const champCourriel = document.getElementById("courriel");
+    const messageCourriel = document.getElementById("messageCourriel");
+    const formInscription = document.getElementById("form-inscription");
 
-function initialisation() {
-    afficherListeUtilisateur();
+    let courrielValide = false;
+
+    if (champCourriel) {
+        champCourriel.addEventListener("blur", async () => {
+            const courriel = champCourriel.value.trim();
+            if (courriel.length === 0) return;
+
+            try {
+                const resultat = await envoyerRequeteAjax(
+                    `/compte/api/verifier_courriel?courriel=${encodeURIComponent(courriel)}`,
+                    "GET"
+                );
+
+                if (resultat.existe) {
+                    messageCourriel.textContent = " Ce courriel est déjà inscrit.";
+                    messageCourriel.className = "mt-1 text-sm text-red-600 font-medium";
+                    courrielValide = false;
+                } else {
+                    messageCourriel.textContent = "Ce courriel est disponible.";
+                    messageCourriel.className = "mt-1 text-sm text-green-600 font-medium";
+                    courrielValide = true;
+                }
+            } catch (err) {
+                console.error("Erreur AJAX :", err);
+            }
+        });
+
+        formInscription.addEventListener("submit", e => {
+            if (!courrielValide) {
+                e.preventDefault();
+                messageCourriel.textContent = "Veuillez entrer un courriel valide et non déjà inscrit.";
+                messageCourriel.className = "mt-1 text-sm text-red-600 font-medium";
+            }
+        });
+    }
+});
+
+function initialisationUtilisateur() {
+    
+    if (champRecherche) {
+        champRecherche.addEventListener("input", rechercherUtilisateur);
+    }
+
+    if (listeResultats && champRecherche) {
+        document.addEventListener("click", (e) => {
+            if (!listeResultats.contains(e.target) && e.target !== champRecherche) {
+                listeResultats.classList.add("d-none");
+            }
+        });
+    }
 }
 
-window.addEventListener("load", initialisation);
+window.addEventListener("load", initialisationUtilisateur);
+
+
+
