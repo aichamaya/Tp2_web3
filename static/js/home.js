@@ -9,17 +9,19 @@ const nbParScroll = 3;
 
 async function chargerServicesRecents() {
     try {
+        const container = document.getElementById("services-recents");
+        if (!container) return;
+
         const resultat = await envoyerRequeteAjax("/api/services/recents", "GET");
+
         if (resultat.code === 200 && resultat.services) {
-            const container = document.getElementById("services-recents");
-            if (!container) return;
-            container.innerHTML = "";
+            container.innerHTML = "";  
 
             resultat.services.forEach(s => {
                 const div = document.createElement("div");
                 div.className = "col-md-4";
                 div.innerHTML = `
-                    <div class="card h-100">
+                    <div class="card h-100" data-id-service="${s.id_service}">
                         ${s.nom_image ? `<img class="card-img-top object-fit-cover" style="height: 200px;" src="/static/images/ajouts/${s.nom_image}" alt="${s.titre}">` : ""}
                         <div class="card-body">
                             <h5 class="card-title mb-1">${s.titre}</h5>
@@ -34,6 +36,13 @@ async function chargerServicesRecents() {
     } catch (err) {
         console.error("Erreur chargement services récents :", err);
     }
+}
+
+function rafraichirServicesRecents() {
+
+    setInterval(() => {
+        chargerServicesRecents();
+    }, 5000);
 }
 
 async function chargerTousLesServices() {
@@ -92,6 +101,7 @@ function initialisation() {
 
     chargerServicesRecents();
     chargerTousLesServices();
+    rafraichirServicesRecents();
     
     window.addEventListener("scroll", scrollHandler);
     
