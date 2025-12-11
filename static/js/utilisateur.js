@@ -104,7 +104,7 @@ async function supprimerUtilisateur(id_utilisateur) {
     if (!confirm("Voulez-vous vraiment supprimer ce compte ?")) return;
 
     try {
-        const response = await fetch(`/compte/supprimer/${id_utilisateur}`, {
+        const response = await fetch(`/compte/api/supprimer/${id_utilisateur}`, {
             method: "POST",
             headers: {
                 "X-Requested-With": "XMLHttpRequest"
@@ -134,10 +134,6 @@ async function supprimerUtilisateur(id_utilisateur) {
 }
 
 
-
-/* ==========================================================
-   GESTION DE LA RECHERCHE & LOCAL STORAGE
-   ========================================================== */
 
 function getHistorique() {
     return JSON.parse(localStorage.getItem(CLE_STORAGE)) || [];
@@ -271,7 +267,6 @@ function afficherSuggestionsDynamiques(texte) {
         });
         listeSuggestions.appendChild(li);
     });
-    // listeSuggestions.classList.remove("d-none");
     listeSuggestions.classList.toggle("d-none", matches.length === 0);
 }
 

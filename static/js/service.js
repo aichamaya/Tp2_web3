@@ -99,11 +99,12 @@ async function supprimerService(id_service) {
     if (!confirm("Voulez-vous vraiment supprimer ce service ?")) return;
 
     try {
-        const response = await fetch(`/${id_service}/supprimer`, {
+        const response = await fetch(`/api/supprimer/service/${id_service}`, {
             method: "POST",
             headers: {
                 "X-Requested-With": "XMLHttpRequest"
             }
+            
         });
 
         let data = {};
