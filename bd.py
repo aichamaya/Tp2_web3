@@ -11,6 +11,7 @@ def creer_connexion():
         password=os.getenv('BD_MDP'),
         host=os.getenv('BD_SERVEUR'),
         database=os.getenv('BD_NOM_SCHEMA'),
+        port=int(os.getenv('BD_PORT')),
         raise_on_warnings=True
        
     )

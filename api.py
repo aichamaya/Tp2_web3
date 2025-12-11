@@ -6,17 +6,18 @@ import bd
 
 bp_api = Blueprint('api', __name__)
 
-@bp_service.route("api/services")
+@bp_service.route("/api/services")
 def services_list_api():
     """Recherche des services par mot-clé."""
     q = (request.args.get("q") or "").strip().lower()
     try:
         with bd.creer_connexion() as conn:
-            rows = bd.search_services(conn, q=q)
+            services = bd.search_services(conn, q=q)
+            print("Nombre de services actifs récupérés :", len(services))
     except Exception as e:
-         rows = []
+         services = []
 
-    return jsonify(rows)
+    return jsonify(services)
 
 # @bp_service.route("/api/services/search")
 # def api_services_recherche():
@@ -117,7 +118,7 @@ def supprimer_compte_api(id_utilisateur):
         return  jsonify(data) 
 
 
-@bp_compte.route("compte/api/utilisateurs")
+@bp_compte.route("/api/utilisateurs")
 def liste_utilisateurs_api():
     data ={}
 

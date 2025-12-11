@@ -16,14 +16,27 @@
         <span class="visually-hidden">Chargement...</span>
       </div>
       <ul id="resultats-recherche"
-        class="list-group position-absolute top-100 start-0 w-100 z-3 d-none mt-1 shadow-sm"></ul>
+        class="list-group position-absolute top-100 start-0 w-100 z-3 d-none mt-1 shadow-sm">
+      </ul>
     </div>
   </div>
 
   <!-- Liste des services -->
-  <div class="row g-4">
-    {% if services %}
-      {% for s in services %}
+    <div id="liste-services" class="row g-4">
+     
+  </div>
+  <div id="pied-page-services" class="text-center text-muted mt-4 d-none">
+      Tous les services sont affichés.
+  </div>
+  
+
+  <div id="message-aucun-service" class="d-none text-muted fst-italic">
+      Aucun service trouvé.
+  </div>
+
+  {# <div class="row g-4">
+    {% if services %} #}
+      {# {% for s in services %}
       <div class="col-md-4">
         <div class="card h-100 shadow-sm border-0">
 
@@ -83,11 +96,16 @@
           </div>
         </div>
       </div>
-      {% endfor %}
-    {% else %}
+      {% endfor %} #}
+    {# {% else %}
       <p class="text-muted fst-italic">Aucun service trouvé.</p>
     {% endif %}
-  </div>
+  </div> #}
 </div>
+
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/service.js') }}"></script>
 
 {% endblock %}

@@ -1,24 +1,189 @@
 "use strict";
 
 /*global envoyerRequeteAjax*/
+let tousLesServices = [];
+let indexAffichage = 0;
+const nbInitial = 6;
+const nbParScroll = 3;
 
 let controleur = null;
+const CLE_STORAGE = "tableauLocal"; 
+
+let champRecherche = null;
+let chargement = null;
+let listeResultats = null;
+let conteneurServices = null;
+let piedPage = null;
 
 
-const champRecherche = document.getElementById("recherche");
-const chargement = document.getElementById("chargement");
-const listeResultats = document.getElementById("resultats-recherche");
+async function chargerTousLesServices() {
+    try {
+        
+        const liste = await envoyerRequeteAjax("/api/services", "GET");
+
+        if (liste && liste.length > 0) {
+
+            tousLesServices = liste;
+            console.log("Nombre total de services :", tousLesServices.length);
+            indexAffichage = 0;
+
+            if (piedPage) piedPage.classList.add("d-none");
+            afficherPlusDeServices(nbInitial);
+
+            if (indexAffichage < tousLesServices.length) {
+                window.addEventListener("scroll", gererDefilement);
+            } else {
+                if (piedPage) piedPage.classList.remove("d-none");
+            }
+         
+        } else {
+            const msg = document.getElementById("message-aucun-service");
+            if (msg) msg.classList.remove("d-none");
+        }
+
+
+    } catch (err) {
+        console.error("Erreur chargement services :", err);
+    }
+}
+
+function afficherPlusDeServices(nombre) {
+    if (!conteneurServices) return;
+
+    const fin = Math.min(indexAffichage + nombre, tousLesServices.length);
+
+    for (let i = indexAffichage; i < fin; i++) {
+        const s = tousLesServices[i];
+        
+        const col = document.createElement("div");
+        col.className = "col-md-4";
+        
+        const imageSrc = s.nom_image 
+            ? `/static/images/ajouts/${s.nom_image}` 
+            : "/static/images/default_service.png";
+
+        col.innerHTML = `
+            <div class="card h-100 shadow-sm border-0">
+                <a href="/services/${s.id_service}">
+                    <img class="card-img-top object-fit-cover rounded-top" style="height: 200px;"
+                        src="${imageSrc}" alt="${s.titre}"
+                        onerror="this.src='/static/images/default_service.png'">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title mb-2 fw-semibold">${s.titre}</h5>
+                    <p class="small text-muted mb-3">
+                        <i class="bi bi-tag"></i> ${s.nom_categorie} • 
+                        <i class="bi bi-geo-alt"></i> ${s.localisation}
+                    </p>
+                    <a href="/services/${s.id_service}" class="btn btn-outline-primary w-100">Voir détails</a>
+                </div>
+            </div>
+        `;
+        conteneurServices.appendChild(col);
+    }
+
+    indexAffichage = fin;
+  
+}
+
+function gererDefilement() {
+    console.log("gererDefilement appelé");
+    if ((window.innerHeight + window.scrollY) >= 0.95 * document.body.offsetHeight) {
+        // Ajoute 3 services de plus
+        afficherPlusDeServices(nbParScroll);
+    }
+
+    // Si tous les services sont affichés, on enlève l'événement scroll
+    if (indexAffichage >= tousLesServices.length) {
+        if (piedPage) piedPage.classList.remove("d-none");
+        window.removeEventListener("scroll", gererDefilement);
+    }
+  
+}
+
+/**
+ * Récupère tableauLocal et retourne un json (tableau d'objets JS)
+ * Utilise JSON.parse
+ */
+function getTableauFromLocalStorage() {
+    const data = localStorage.getItem(CLE_STORAGE);
+   
+    return data ? JSON.parse(data) : [];
+}
+
+/**
+ * Ajoute un mot clé au tableauLocal
+ * - Récupère le tableau actuel
+ * - Ajoute le nouvel élément (push)
+ * - Sauvegarde avec setItem et JSON.stringify
+ */
+function ajouterElementAuTableau(motCle) {
+    if (!motCle) return;
+
+    let tableau = getTableauFromLocalStorage();
+
+    if (!tableau.includes(motCle)) {
+        tableau.push(motCle);
+        
+        localStorage.setItem(CLE_STORAGE, JSON.stringify(tableau));
+    }
+}
+
+/**
+ * Récupère les valeurs et les ajoute dans un div (ul) comme éléments li.
+ * Implémente un évènement click pour afficher la suggestion sélectionnée.
+ */
+function afficherLocalStorage() {
+    if(!listeResultats) return;
+    listeResultats.innerHTML = "";
+    
+    const tableau = getTableauFromLocalStorage();
+
+    if (tableau.length === 0) {
+        listeResultats.classList.add("d-none");
+        return;
+    }
+
+    
+    tableau.forEach(mot => {
+        const li = document.createElement("li");
+        li.className = "list-group-item list-group-item-action list-group-item-secondary"; 
+        li.textContent = mot;
+        li.style.cursor = "pointer";
+
+        
+        li.addEventListener("click", () => {
+            
+            champRecherche.value = mot;
+            rechercher();
+        
+        });
+
+        listeResultats.appendChild(li);
+    });
+
+    listeResultats.classList.remove("d-none");
+}
+
+
 
 async function rechercher() {
-    
     if (!champRecherche || !listeResultats || !chargement) return;
 
     const aChercher = champRecherche.value.trim();
 
+
+    if (aChercher === "") {
+        if (controleur) controleur.abort();
+        chargement.classList.add("d-none");
+
+        afficherLocalStorage(); 
+        return;
+    }
+
     if (aChercher.length < 3) {
         listeResultats.classList.add("d-none");
-        listeResultats.innerHTML = "";
-        return;
+        return; 
     }
 
     chargement.classList.remove("d-none");
@@ -26,27 +191,26 @@ async function rechercher() {
     if (controleur) {
         controleur.abort();
     }
-
     controleur = new AbortController();
 
     try {
         const resultats = await envoyerRequeteAjax(
             "/api/services",
             "GET",
-            { query: aChercher },
+            { q: aChercher },
             controleur
         );
 
         afficherResultats(resultats);
         chargement.classList.add("d-none");
         controleur = null;
+
     } catch (err) {
         if (err.name !== "AbortError") {
             console.error("Erreur AJAX :", err);
+            listeResultats.classList.add("d-none");
+            chargement.classList.add("d-none");
         }
-        listeResultats.innerHTML = "";
-        listeResultats.classList.add("d-none");
-        chargement.classList.add("d-none");
     }
 }
 
@@ -65,9 +229,14 @@ function afficherResultats(resultats) {
         li.className = "list-group-item list-group-item-action";
         li.textContent = service.titre;
         li.style.cursor = "pointer";
+        
         li.addEventListener("click", () => {
+            
+            ajouterElementAuTableau(service.titre);
+                     
             window.location.href = `/services/${service.id_service}`;
         });
+        
         listeResultats.appendChild(li);
     }
 
@@ -75,11 +244,32 @@ function afficherResultats(resultats) {
 }
 
 function initialisation() {
-    
+
+    conteneurServices = document.getElementById("liste-services");
+    piedPage = document.getElementById("pied-page-services");   
+    champRecherche = document.getElementById("recherche");
+    chargement = document.getElementById("chargement");
+    listeResultats = document.getElementById("resultats-recherche");
+
+    if (piedPage) piedPage.className = "d-none";
+
+
+    if (conteneurServices) {
+        chargerTousLesServices();
+    }
+  
     if (champRecherche) {
+
         champRecherche.addEventListener("input", rechercher);
+        champRecherche.addEventListener("focus", () => {
+  
+            if (champRecherche.value.trim() === "") {
+                afficherLocalStorage();
+            }
+        });
     }
 
+   
     if (listeResultats && champRecherche) {
         document.addEventListener("click", (e) => {
             if (!listeResultats.contains(e.target) && e.target !== champRecherche) {
@@ -87,6 +277,7 @@ function initialisation() {
             }
         });
     }
+
 }
 
 window.addEventListener("load", initialisation);

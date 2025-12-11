@@ -55,5 +55,9 @@
   <a href="{{ url_for('service.publish') }}">Publier le premier</a> !
 </p>
 
-<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+
 {% endblock %}

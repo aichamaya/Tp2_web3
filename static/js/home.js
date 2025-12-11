@@ -89,21 +89,12 @@ function scrollHandler() {
 }
 
 function initialisation() {
-    
+
     chargerServicesRecents();
     chargerTousLesServices();
-
-   
-    window.addEventListener("scroll", scrollHandler);
-
     
-    const champRecherche = document.getElementById("recherche");
-    if (champRecherche) {
-        champRecherche.addEventListener("input", () => {
-            console.log("Recherche :", champRecherche.value);
-        });
-    }
+    window.addEventListener("scroll", scrollHandler);
+    
 }
-
 
 window.addEventListener("load", initialisation);
