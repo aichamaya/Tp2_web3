@@ -85,6 +85,7 @@ function afficherUtilisateurs() {
 
     utilisateursFiltres.forEach(u => {
         const tr = document.createElement("tr");
+        tr.dataset.idUtilisateur = u.id_utilisateur;
         tr.innerHTML = `
             <td>${u.nom}</td>
             <td>${u.courriel}</td>
@@ -97,6 +98,39 @@ function afficherUtilisateurs() {
         `;
         tbody.appendChild(tr);
     });
+}
+
+async function supprimerUtilisateur(id_utilisateur) {
+    if (!confirm("Voulez-vous vraiment supprimer ce compte ?")) return;
+
+    try {
+        const response = await fetch(`/compte/supprimer/${id_utilisateur}`, {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        let data = {};
+        try {
+            data = await response.json();
+        } catch {
+            data = { code: response.ok ? 200 : 500, message: "Réponse invalide du serveur." };
+        }
+
+        if (data.code === 200) {
+            const ligne = document.querySelector(`tr[data-id-utilisateur='${id_utilisateur}']`);
+            if (ligne) ligne.remove();
+
+            alert(data.message || "Compte supprimé !");
+        } else {
+            alert(data.message || "Erreur lors de la suppression du compte.");
+        }
+
+    } catch (err) {
+        console.error("Erreur lors de la suppression :", err);
+        alert("Erreur lors de la suppression du compte.");
+    }
 }
 
 

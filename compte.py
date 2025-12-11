@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, abort
 from utilitaires.compte.validation_compte import valider_compte
 
 import hashlib
@@ -90,31 +90,25 @@ def deconnexion():
 
 @bp_compte.route("/supprimer/<int:id_utilisateur>", methods=["POST"])
 def supprimer_compte(id_utilisateur):
-    """Suppression du compte."""
-   
-    id_session = session.get("id_utilisateur")
-    if not id_session:
-        flash("Vous devez être connecté pour effectuer cette action.", "danger")
-        return redirect(url_for("compte.connexion"))
-        
-   
-    if id_session != id_utilisateur and session.get("role") != "admin":
-        abort(403)  
+    """Suppression du compte via AJAX uniquement."""
+    if "id_utilisateur" not in session:
+        return jsonify(code=401, message="Vous devez être connecté pour effectuer cette action.")
+
+    if session["id_utilisateur"] != id_utilisateur and session.get("role") != "admin":
+        return jsonify(code=403, message="Vous n'êtes pas autorisé à supprimer ce compte.")
+
     try:
         with bd.creer_connexion() as conn:
-            lignes_supprimees = bd.supprimer_utilisateur(conn, id_utilisateur) 
-            
-        if lignes_supprimees == 0:
-            flash("Erreur: Compte non trouvé ou déjà supprimé.", "danger")
-            return redirect(url_for("service.home"))     
-        else:
-            flash(f"Le compte utilisateur a été supprimé.", "success")
-            
-    except Exception: 
-        flash("Erreur lors de la suppression du compte.", "danger")
-        
-    return redirect(url_for("compte.liste_utilisateurs")) 
+            lignes_supprimees = bd.supprimer_utilisateur(conn, id_utilisateur)
 
+        if lignes_supprimees == 0:
+            return jsonify(code=404, message="Compte non trouvé ou déjà supprimé.")
+
+        return jsonify(code=200, message="Le compte utilisateur a été supprimé.")
+
+    except Exception as e:
+        print(f"Erreur lors de la suppression du compte : {e}")
+        return jsonify(code=500, message="Erreur lors de la suppression du compte.")
 
 
 @bp_compte.route("/utilisateurs")
