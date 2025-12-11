@@ -9,6 +9,10 @@ bp_api = Blueprint('api', __name__)
 @bp_service.route("/api/services")
 def services_list_api():
     """Recherche des services par mot-clé."""
+
+    id_current = session.get("id_utilisateur")
+    role_current = session.get("role")
+
     q = (request.args.get("q") or "").strip().lower()
     try:
         with bd.creer_connexion() as conn:
@@ -16,7 +20,10 @@ def services_list_api():
             print("Nombre de services actifs récupérés :", len(services))
     except Exception as e:
          services = []
-
+         
+    for s in services:
+        s["id_utilisateur_current"] = id_current
+        s["role_current"] = role_current
     return jsonify(services)
 
 # @bp_service.route("/api/services/search")

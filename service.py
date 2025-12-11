@@ -1,5 +1,5 @@
 import re
-from flask import Blueprint, render_template, request, redirect, abort, flash, current_app, session, url_for,current_app as app
+from flask import Blueprint, render_template, request, redirect, abort, flash, current_app, session, url_for,current_app as app, jsonify
 from babel import numbers, dates
 from datetime import datetime
 import os
@@ -43,33 +43,48 @@ def services_list():
 
     return render_template("services/service_list.jinja", services=rows)
 
-@bp_service.route("/<int:id_service>/supprimer", methods=["POST", "GET"])
+@bp_service.route("/<int:id_service>/supprimer", methods=["POST"])
 def supprimer_service(id_service):
-    """Supprime un service si l'utilisateur est admin ou le créateur."""
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
     if "id_utilisateur" not in session:
-        flash("Vous devez être connecté pour supprimer un service.", "warning")
-        return redirect(url_for('compte.connexion'))
+        if is_ajax:
+            return jsonify(code=401, message="Vous devez être connecté pour supprimer ce service.")
+        else:
+            flash("Vous devez être connecté pour supprimer ce service.", "warning")
+            return redirect(url_for('compte.connexion'))
 
     try:
         with bd.creer_connexion() as conn:
             s = bd.get_service_by_id(conn, id_service)
             if not s:
-                abort(404)
-            
-            # Vérifie si l'utilisateur est admin ou propriétaire
-            if not session.get('est_admin', False) and s["id_utilisateur"] != session["id_utilisateur"]:
-                flash("Vous n'êtes pas autorisé à supprimer ce service.", "danger")
-                return redirect(url_for('service.services_list'))
+                if is_ajax:
+                    return jsonify(code=404, message="Service inexistant.")
+                else:
+                    abort(404)
 
-            bd.supprimer_service(conn, id_service) 
+            if not session["role"] == "admin" and s["id_utilisateur"] != session["id_utilisateur"]:
+                if is_ajax:
+                    return jsonify(code=403, message="Vous n'êtes pas autorisé à supprimer ce service.")
+                else:
+                    flash("Vous n'êtes pas autorisé à supprimer ce service.", "danger")
+                    return redirect(url_for('service.services_list'))
 
-        flash("Le service a été supprimé !", "success")
-        return redirect(url_for('service.services_list'))
+            bd.supprimer_service(conn, id_service)
+
+        if is_ajax:
+            return jsonify(code=200, message="Le service a été supprimé !")
+        else:
+            flash("Le service a été supprimé !", "success")
+            return redirect(url_for('service.services_list'))
 
     except Exception as e:
         print(f"Erreur lors de la suppression du service : {e}")
-        flash("Erreur lors de la suppression du service.", "danger")
-        return redirect(url_for('service.services_list'))
+        if is_ajax:
+            return jsonify(code=500, message="Erreur lors de la suppression du service.")
+        else:
+            flash("Erreur lors de la suppression du service.", "danger")
+            return redirect(url_for('service.services_list'))
 
  
 @bp_service.route("/services/<int:service_id>")
