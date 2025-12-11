@@ -4,14 +4,9 @@
 
 
 let tousLesUtilisateurs = [];   
-let utilisateursFiltres = [];  
-let indexUtilisateur = 0;        
-const nbInitial = 6;           
-const nbParScroll = 3;       
-
-let controleurUtilisateur = null;
+let utilisateursFiltres = [];      
+          
 const CLE_STORAGE = "historique_utilisateurs";
-
 
 let champRecherche = null;
 let conteneurTableau = null;
@@ -28,14 +23,11 @@ async function chargerUtilisateurs() {
         if (resultat.code === 200 && resultat.utilisateurs) {
             tousLesUtilisateurs = resultat.utilisateurs;
             utilisateursFiltres = tousLesUtilisateurs; 
-          
-            construireTableStructure();
-            
-            afficherPlusDUtilisateurs(nbInitial);
+            console.log(tousLesUtilisateurs)
+            construireTableStructure();        
 
-            
-            window.addEventListener("scroll", scrollHandler);
-            scrollHandler(); 
+            afficherUtilisateurs();
+ 
         } else {
             conteneurTableau.innerHTML = "<div class='alert alert-warning'>Aucun utilisateur trouvé.</div>";
         }
@@ -54,8 +46,7 @@ async function supprimerUtilisateur(id_utilisateur) {
             "DELETE"
         );
 
-        if (resultat.code === 200) {
-            
+        if (resultat.code === 200) {         
             location.reload(); 
         }
     } catch (err) {
@@ -63,10 +54,6 @@ async function supprimerUtilisateur(id_utilisateur) {
     }
 }
 
-
-/* ==========================================================
-    GESTION DU DÉFILEMENT INFINI 
-   ========================================================== */
 
 function construireTableStructure() {
     conteneurTableau.innerHTML = ""; 
@@ -89,14 +76,14 @@ function construireTableStructure() {
     conteneurTableau.appendChild(table);
 }
 
-function afficherPlusDUtilisateurs(nombre = nbParScroll) {
+function afficherUtilisateurs() {
+
     const tbody = document.getElementById("corps-table-utilisateurs");
     if (!tbody) return;
 
-    const fin = Math.min(indexUtilisateur + nombre, utilisateursFiltres.length);
+    tbody.innerHTML = "";
 
-    for (let i = indexUtilisateur; i < fin; i++) {
-        const u = utilisateursFiltres[i];
+    utilisateursFiltres.forEach(u => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${u.nom}</td>
@@ -109,21 +96,9 @@ function afficherPlusDUtilisateurs(nombre = nbParScroll) {
             </td>
         `;
         tbody.appendChild(tr);
-    }
-
-    indexUtilisateur = fin;
+    });
 }
 
-function scrollHandler() {
-    
-    if (indexUtilisateur >= utilisateursFiltres.length) return;
-
-    
-    if ((window.innerHeight + window.scrollY) >= 0.95 * document.body.offsetHeight) {
-        console.log("Ajout d'utilisateurs...");
-        afficherPlusDUtilisateurs(nbParScroll);
-    }
-}
 
 
 /* ==========================================================
@@ -184,12 +159,9 @@ function filtrerTableau(texte) {
         );
     }
 
-    const tbody = document.getElementById("corps-table-utilisateurs");
-    if (tbody) tbody.innerHTML = ""; 
-    indexUtilisateur = 0; 
-    
-    afficherPlusDUtilisateurs(nbInitial);
-    
+  
+    afficherUtilisateurs(); 
+
     if (listeSuggestions) listeSuggestions.classList.add("d-none");
 }
 
@@ -198,9 +170,8 @@ function initialisationUtilisateur() {
     conteneurTableau = document.getElementById("tableau-utilisateurs");
     champRecherche = document.getElementById("recherche");
     listeSuggestions = document.getElementById("resultats-recherche-utilisateurs");
-    // const conteneur = document.getElementById("tableau-utilisateurs");
 
-    if (!conteneur) {
+    if (!conteneurTableau) {
         return; 
     }
     
@@ -213,10 +184,9 @@ function initialisationUtilisateur() {
             
             if (val === "") {
                 filtrerTableau(""); 
-                return;
+                
             }
-
-            if (val.length > 3) {
+            else if (val.length > 3) {
                 afficherSuggestionsDynamiques(val);
             }
         });
@@ -267,7 +237,8 @@ function afficherSuggestionsDynamiques(texte) {
         });
         listeSuggestions.appendChild(li);
     });
-    listeSuggestions.classList.remove("d-none");
+    // listeSuggestions.classList.remove("d-none");
+    listeSuggestions.classList.toggle("d-none", matches.length === 0);
 }
 
 
