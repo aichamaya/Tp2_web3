@@ -30,12 +30,10 @@ def services_list():
     """Liste des services avec filtres."""
     locale = request.cookies.get("local", "fr_CA")
     q = (request.args.get("q") or "").strip()
-    # categorie = request.args.get("categorie")
-    # localisation = (request.args.get("localisation") or "").strip()
 
     try:
         with bd.creer_connexion() as conn:
-            # cats = bd.get_categories(conn)
+    
             rows = bd.search_services(conn, q=q)
     except Exception as e:
         flash(f"Erreur de base de données lors de la recherche: {e}", "danger")
@@ -73,6 +71,7 @@ def supprimer_service(id_service):
             bd.supprimer_service(conn, id_service)
 
         if is_ajax:
+            app.logger.info(f"Suppression service ID={id_service} par utilisateur={session['id_utilisateur']}")
             return jsonify(code=200, message="Le service a été supprimé !")
         else:
             flash("Le service a été supprimé !", "success")
@@ -108,9 +107,7 @@ def service_detail(service_id):
 @bp_service.route("/publish", methods=["GET", "POST"])
 def publish():
     """Ajout d'un service ."""
-    # if "user_id" not in session:
-    #     flash("Vous devez être connecté pour publier un service.", "warning")
-    #     return redirect(url_for("compte.connexion"))
+ 
     image_nom= ""
     id_proprietaire = session["id_utilisateur"]
     locale = request.cookies.get("local", "fr_CA")
@@ -168,6 +165,8 @@ def publish():
         return redirect(url_for(".publish"))
 
     flash("Service ajouté avec succès.", "success")
+    app.logger.info(f"Ajout service ID={new_id} par utilisateur={session['id_utilisateur']}")
+    
     return redirect(url_for(".service_detail", service_id=new_id), code=303)
 
 @bp_service.route("/services/<int:service_id>/edit", methods=["GET", "POST"])
@@ -240,6 +239,7 @@ def edit_service(service_id):
 
             bd.update_service_with_image(conn, service_id, titre, localisation, description, actif, cout,image_nom)
 
+            app.logger.info(f"Modification service ID={service_id} par utilisateur={session['id_utilisateur']}")
             flash("Service mis à jour.", "success")
             return redirect(url_for("service.service_detail", service_id=service_id), code=303)
 

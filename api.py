@@ -1,4 +1,4 @@
-from flask import Blueprint, request, session,jsonify
+from flask import Blueprint, request, session,jsonify,current_app
 
 from service import bp_service
 from compte import bp_compte
@@ -104,4 +104,7 @@ def api_services():
     """Retourne les 5 derniers services ajoutés."""
     with bd.creer_connexion() as conn:
         services = bd.get_service_all(conn)
+        current_app.logger.info(f"Affichage des services dans la page d'accueil par l'utilisateur (ID= {session.get('id_utilisateur')})")
+
+
     return jsonify(code=200, services=services)

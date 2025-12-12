@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort, current_app as app
 from datetime import datetime, date
 from babel import dates, numbers
 import bd
@@ -101,10 +101,14 @@ def reserver_service(id_service):
                                     heure_choisir_obj.strftime("%H:%M:%S"))
         except Exception as e:
             print(f"Erreur lors de la réservation et/ou de la transaction: {e}")
+            app.logger.warning(f"Tentative de réservation interdite : service={id_service}, utilisateur={session.get('id_utilisateur')}"
+)
             flash("Une erreur est survenue lors de la tentative de réservation.", "danger")
             return redirect(url_for("service.service_detail", service_id=id_service))
 
     flash(f"Réservation de '{s['titre']}' pour le {date_choisir} à {heure_choisir} confirmée!", "success")
+    app.logger.info(f"Réservation service ID={id_service} par utilisateur={session['id_utilisateur']}"
+)
     return redirect(url_for(".liste_reservations"), code=303)
 
  

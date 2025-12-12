@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, abort, current_app as app
 from utilitaires.compte.validation_compte import valider_compte
 
 import hashlib
@@ -74,9 +74,12 @@ def connexion():
                 session["role"] = utilisateurTrouve["role"]
                 session["credit"] = utilisateurTrouve["credit"]          
                 flash(f"Connexion réussie. Bienvenue, {utilisateurTrouve['courriel']}.", "success")
+                app.logger.info(f"Connexion réussie de l'utilisateur :{session.get('nom')} (ID: {session.get('id_utilisateur')})")
+
                 return redirect(url_for("home"), 302) 
             else:
                 flash("Courriel ou mot de passe incorrect.", "danger")
+                app.logger.warning(f"Tentative de connexion échouée (courriel={courriel})")
                 return render_template("compte/connexion.jinja")
     return render_template("compte/connexion.jinja")
 
@@ -84,9 +87,12 @@ def connexion():
 @bp_compte.route("/deconnexion")
 def deconnexion():
     """Gère la déconnexion de l'utilisateur ."""
+    app.logger.info(f"Déconnexion réussie de l'utilisateur: {session.get('nom')} (ID: {session.get('id_utilisateur')})")
     session.clear() 
     flash("Vous avez été déconnecté.", "info")
     return redirect(url_for("service.home"), 302)
+
+
 
 @bp_compte.route("/supprimer/<int:id_utilisateur>", methods=["POST"])
 def supprimer_compte(id_utilisateur):

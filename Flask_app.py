@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, make_response, session,url_for,g,  jsonify
+from flask import Flask, render_template, request, redirect, make_response, session,url_for,g
 from flask_babel import Babel
 from service import bp_service
 from reservation import bp_reservation
@@ -12,6 +12,7 @@ if not os.getenv('BD_UTILISATEUR'):
     dotenv.load_dotenv('.env')
 
 app = Flask(__name__)
+
 app.logger.setLevel(logging.DEBUG)
 app.config['CHEMIN_VERS_AJOUTS'] = os.path.join('static', 'images', 'ajouts')
 os.makedirs(app.config['CHEMIN_VERS_AJOUTS'], exist_ok=True)
