@@ -76,8 +76,8 @@ def reserver_service(id_service):
         return redirect(url_for("reservation.formulaire_reservation", id_service=id_service))
 
     
-    date_reservation = date_obj.strftime("%Y-%m-%d")      
-    date_souhaitee = heure_obj.strftime("%H:%M:%S")      
+    date_reservation = date_obj    
+    date_souhaitee = heure_obj     
 
     with bd.creer_connexion() as conn:
         service = bd.get_service_by_id(conn, id_service)
@@ -110,3 +110,13 @@ def reserver_service(id_service):
     app.logger.info(f"Réservation de service réussie: ID service={id_service} par utilisateur={session['id_utilisateur']}")
     flash("Réservation confirmée !", "success")
     return redirect(url_for("reservation.liste_reservations"), code=303)
+
+def obtenir_les_utilisateurs(conn):
+    """permet d'obtenir la liste des utilisateurs"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT *
+            FROM utilisateurs
+
+        """)
+        return curseur.fetchall()

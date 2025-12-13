@@ -2,6 +2,7 @@ import os
 import types
 import contextlib
 import mysql.connector
+from datetime import date, time
 
 @contextlib.contextmanager
 def creer_connexion():
@@ -11,7 +12,7 @@ def creer_connexion():
         password=os.getenv('BD_MDP'),
         host=os.getenv('BD_SERVEUR'),
         database=os.getenv('BD_NOM_SCHEMA'),
-       
+        port = 3307,
         raise_on_warnings=True
        
     )
@@ -37,9 +38,6 @@ def get_curseur(self):
     finally:
         curseur.close()
 
-# def hacher_mdp(mdp_en_clair):
-#     """Prend un mot de passe en clair et lui applique une fonction de hachage"""
-#     return hashlib.sha512(mdp_en_clair.encode('utf-8')).hexdigest()
 
 def verifier_utilisateur_existe(conn, courriel):
     """obtenir un utlisateur grâce à son couuriel"""
@@ -290,23 +288,23 @@ def get_reservations_for_owner(conn, id_proprietaire: int):
         )
         return curseur.fetchall()
     
-def service_a_deja_ete_reserve(conn, id_service, date, heure):
-    """verifie si le a été reservè ou pas"""
+
+
+def service_a_deja_ete_reserve(conn, id_service, date_reservation: date, heure_reservation: time):
+    """Vérifie si le service a déjà été réservé à cette date et heure"""
     with conn.get_curseur() as curseur:
-        curseur.execute("SELECT COUNT(*) AS total FROM reservations WHERE id_service = %s and date_reservation = %s and date_souhaitee = %s", (id_service, date, heure,))
+        curseur.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM reservations
+            WHERE id_service = %s
+              AND date_reservation = %s
+              AND date_souhaitee = %s
+            """,
+            (id_service, date_reservation, heure_reservation)
+        )
         result = curseur.fetchone()
         return result["total"] > 0
-
-def obtenir_les_utilisateurs(conn):
-    """permet d'obtenir la liste des utilisateurs"""
-    with conn.get_curseur() as curseur:
-        curseur.execute("""
-            SELECT *
-            FROM utilisateurs
-            
-        """)
-        return curseur.fetchall()
-    
 
 
 def compter_reservations_faites(conn, id_utilisateur: int) -> int:
@@ -340,3 +338,12 @@ def compter_reservations_recues(conn, id_proprietaire: int) -> int:
         return int(res["total"]) if res else 0
 
     
+def obtenir_les_utilisateurs(conn):
+    """permet d'obtenir la liste des utilisateurs"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT *
+            FROM utilisateurs
+
+        """)
+        return curseur.fetchall()
