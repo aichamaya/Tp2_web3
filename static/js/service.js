@@ -7,18 +7,16 @@ const nbInitial = 6;
 const nbParScroll = 3;
 
 let controleur = null;
-const CLE_STORAGE = "tableauLocal"; 
+const CLE_STORAGE = "tableauLocal";
 
 let champRecherche = null;
 let chargement = null;
 let listeResultats = null;
 let conteneurServices = null;
 let piedPage = null;
-
-
 async function chargerTousLesServices() {
     try {
-        
+
         const liste = await envoyerRequeteAjax("/api/services", "GET");
 
         if (liste && liste.length > 0) {
@@ -35,7 +33,7 @@ async function chargerTousLesServices() {
             } else {
                 if (piedPage) piedPage.classList.remove("d-none");
             }
-         
+
         } else {
             const msg = document.getElementById("message-aucun-service");
             if (msg) msg.classList.remove("d-none");
@@ -58,35 +56,52 @@ function afficherPlusDeServices(nombre) {
         const col = document.createElement("div");
         col.className = "col-md-4";
 
-        const imageSrc = s.nom_image 
-            ? `/static/images/ajouts/${s.nom_image}` 
+        const imageSrc = s.nom_image
+            ? `/static/images/ajouts/${s.nom_image}`
             : "/static/images/default_service.png";
 
+        const estProprio = (s.id_utilisateur_current === s.id_utilisateur);
+        const estAdmin = (s.role_current === "admin");
+
+        const peutSupprimer = estProprio || estAdmin;
+        const peutModifier = estProprio;                 
+        const peutReserver = !estProprio && s.actif;     
+
         col.innerHTML = `
-            <div class="card h-100 shadow-sm border-0" data-id-service="${s.id_service}">
-                <a href="/services/${s.id_service}">
-                    <img class="card-img-top object-fit-cover rounded-top" style="height: 200px;"
-                        src="${imageSrc}" alt="${s.titre}"
-                        onerror="this.src='/static/images/default_service.png'">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title mb-2 fw-semibold">${s.titre}</h5>
-                    <p class="small text-muted mb-3">
-                        <i class="bi bi-tag"></i> ${s.nom_categorie} • 
-                        <i class="bi bi-geo-alt"></i> ${s.localisation}
-                    </p>
-                    <div class="d-grid gap-2">
-                        <a href="/services/${s.id_service}" class="btn btn-outline-primary w-100">Voir détails</a>
-                        ${
-                            (s.id_utilisateur_current === s.id_utilisateur || s.role_current === "admin")
-                                ? `<a href="/services/${s.id_service}/edit" class="btn btn-outline-secondary w-100">Modifier</a>
-                                   <button class="btn btn-outline-danger w-100" onclick="supprimerService(${s.id_service})">Supprimer</button>`
-                                : (s.actif ? `<a href="/reservation/formulaire/${s.id_service}" class="btn btn-outline-success w-100">Réserver</a>` : "")
-                        }
-                    </div>
-                </div>
-            </div>
-        `;
+      <div class="card h-100 shadow-sm border-0" data-id-service="${s.id_service}">
+        <a href="/services/${s.id_service}">
+          <img class="card-img-top object-fit-cover rounded-top" style="height: 200px;"
+               src="${imageSrc}" alt="${s.titre}"
+               onerror="this.src='/static/images/default_service.png'">
+        </a>
+
+        <div class="card-body">
+          <h5 class="card-title mb-2 fw-semibold">${s.titre}</h5>
+          <p class="small text-muted mb-3">
+            <i class="bi bi-tag"></i> ${s.nom_categorie} •
+            <i class="bi bi-geo-alt"></i> ${s.localisation}
+          </p>
+
+          <div class="d-grid gap-2">
+            <a href="/services/${s.id_service}" class="btn btn-outline-primary w-100">Voir détails</a>
+
+            ${peutReserver ? `
+              <a href="/reservation/formulaire/${s.id_service}" class="btn btn-outline-success w-100">Réserver</a>
+` : ""}
+
+            ${peutModifier ? `
+              <a href="/services/${s.id_service}/edit" class="btn btn-outline-secondary w-100">
+                Modifier
+              </a>` : ""}
+
+            ${peutSupprimer ? `
+              <button class="btn btn-outline-danger w-100" onclick="supprimerService(${s.id_service})">
+                Supprimer
+              </button>` : ""}
+          </div>
+        </div>
+      </div>
+    `;
 
         conteneurServices.appendChild(col);
     }
@@ -95,16 +110,15 @@ function afficherPlusDeServices(nombre) {
 }
 
 
+
 async function supprimerService(id_service) {
     if (!confirm("Voulez-vous vraiment supprimer ce service ?")) return;
 
     try {
-        const response = await fetch(`/api/supprimer/service/${id_service}`, {
+        const response = await fetch(`/${id_service}/supprimer`, {
             method: "POST",
-            headers: {
-                "X-Requested-With": "XMLHttpRequest"
-            }
-            
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+
         });
 
         let data = {};
@@ -147,7 +161,7 @@ function gererDefilement() {
         if (piedPage) piedPage.classList.remove("d-none");
         window.removeEventListener("scroll", gererDefilement);
     }
-  
+
 }
 
 /**
@@ -156,16 +170,11 @@ function gererDefilement() {
  */
 function getTableauFromLocalStorage() {
     const data = localStorage.getItem(CLE_STORAGE);
-   
+
     return data ? JSON.parse(data) : [];
 }
 
-/**
- * Ajoute un mot clé au tableauLocal
- * - Récupère le tableau actuel
- * - Ajoute le nouvel élément (push)
- * - Sauvegarde avec setItem et JSON.stringify
- */
+
 function ajouterElementAuTableau(motCle) {
     if (!motCle) return;
 
@@ -173,19 +182,16 @@ function ajouterElementAuTableau(motCle) {
 
     if (!tableau.includes(motCle)) {
         tableau.push(motCle);
-        
+
         localStorage.setItem(CLE_STORAGE, JSON.stringify(tableau));
     }
 }
 
-/**
- * Récupère les valeurs et les ajoute dans un div (ul) comme éléments li.
- * Implémente un évènement click pour afficher la suggestion sélectionnée.
- */
+
 function afficherLocalStorage() {
-    if(!listeResultats) return;
+    if (!listeResultats) return;
     listeResultats.innerHTML = "";
-    
+
     const tableau = getTableauFromLocalStorage();
 
     if (tableau.length === 0) {
@@ -193,19 +199,19 @@ function afficherLocalStorage() {
         return;
     }
 
-    
+
     tableau.forEach(mot => {
         const li = document.createElement("li");
-        li.className = "list-group-item list-group-item-action list-group-item-secondary"; 
+        li.className = "list-group-item list-group-item-action list-group-item-secondary";
         li.textContent = mot;
         li.style.cursor = "pointer";
 
-        
+
         li.addEventListener("click", () => {
-            
+
             champRecherche.value = mot;
             rechercher();
-        
+
         });
 
         listeResultats.appendChild(li);
@@ -226,13 +232,13 @@ async function rechercher() {
         if (controleur) controleur.abort();
         chargement.classList.add("d-none");
 
-        afficherLocalStorage(); 
+        afficherLocalStorage();
         return;
     }
 
     if (aChercher.length < 3) {
         listeResultats.classList.add("d-none");
-        return; 
+        return;
     }
 
     chargement.classList.remove("d-none");
@@ -264,7 +270,7 @@ async function rechercher() {
 }
 
 function afficherResultats(resultats) {
-    if (!listeResultats) return; 
+    if (!listeResultats) return;
 
     listeResultats.innerHTML = "";
 
@@ -278,14 +284,14 @@ function afficherResultats(resultats) {
         li.className = "list-group-item list-group-item-action";
         li.textContent = service.titre;
         li.style.cursor = "pointer";
-        
+
         li.addEventListener("click", () => {
-            
+
             ajouterElementAuTableau(service.titre);
-                     
+
             window.location.href = `/services/${service.id_service}`;
         });
-        
+
         listeResultats.appendChild(li);
     }
 
@@ -295,7 +301,7 @@ function afficherResultats(resultats) {
 function initialisation() {
 
     conteneurServices = document.getElementById("liste-services");
-    piedPage = document.getElementById("pied-page-services");   
+    piedPage = document.getElementById("pied-page-services");
     champRecherche = document.getElementById("recherche");
     chargement = document.getElementById("chargement");
     listeResultats = document.getElementById("resultats-recherche");
@@ -306,19 +312,19 @@ function initialisation() {
     if (conteneurServices) {
         chargerTousLesServices();
     }
-  
+
     if (champRecherche) {
 
         champRecherche.addEventListener("input", rechercher);
         champRecherche.addEventListener("focus", () => {
-  
+
             if (champRecherche.value.trim() === "") {
                 afficherLocalStorage();
             }
         });
     }
 
-   
+
     if (listeResultats && champRecherche) {
         document.addEventListener("click", (e) => {
             if (!listeResultats.contains(e.target) && e.target !== champRecherche) {

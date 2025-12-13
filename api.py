@@ -1,4 +1,5 @@
 from flask import Blueprint, request, session,jsonify,current_app
+from datetime import datetime
 
 from service import bp_service
 from compte import bp_compte
@@ -108,3 +109,35 @@ def api_services():
 
 
     return jsonify(code=200, services=services)
+
+@bp_api.route("/api/reservations/disponibilite/<int:id_service>", methods=["GET"])
+def api_disponibilite_reservation(id_service: int):
+    """
+    Vérifie si un service est disponible pour une date + heure (AJAX).
+    GET ?date=YYYY-MM-DD&heure=HH:MM
+    Retour: { disponible: bool, message: str }
+    """
+    date_str = (request.args.get("date") or "").strip()
+    heure_str = (request.args.get("heure") or "").strip()
+
+    if not date_str or not heure_str:
+        return jsonify(disponible=False, message="Choisissez une date et une heure."), 200
+
+    try:
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+        heure_obj = datetime.strptime(heure_str, "%H:%M").time()
+    except ValueError:
+        return jsonify(disponible=False, message="Date ou heure invalide."), 200
+
+    with bd.creer_connexion() as conn:
+        service = bd.get_service_by_id(conn, id_service)
+        if not service:
+            return jsonify(disponible=False, message="Service introuvable."), 404
+
+        # IMPORTANT: doit matcher ta BD (DATE + TIME)
+        deja_reserve = bd.service_a_deja_ete_reserve(conn, id_service, date_obj, heure_obj)
+
+    if deja_reserve:
+        return jsonify(disponible=False, message="⛔ Déjà réservé à cette date et heure."), 200
+
+    return jsonify(disponible=True, message="✅ Disponible."), 200

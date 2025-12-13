@@ -11,7 +11,7 @@ def creer_connexion():
         password=os.getenv('BD_MDP'),
         host=os.getenv('BD_SERVEUR'),
         database=os.getenv('BD_NOM_SCHEMA'),
-        port=int(os.getenv('BD_PORT')),
+       
         raise_on_warnings=True
        
     )
@@ -307,5 +307,36 @@ def obtenir_les_utilisateurs(conn):
         """)
         return curseur.fetchall()
     
+
+
+def compter_reservations_faites(conn, id_utilisateur: int) -> int:
+    """Nombre de réservations faites par l'utilisateur (client)."""
+    with conn.get_curseur() as curseur:
+        curseur.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM reservations
+            WHERE id_utilisateur = %s
+            """,
+            (id_utilisateur,)
+        )
+        res = curseur.fetchone()
+        return int(res["total"]) if res else 0
+
+
+def compter_reservations_recues(conn, id_proprietaire: int) -> int:
+    """Nombre de réservations reçues (réservations faites sur mes services)."""
+    with conn.get_curseur() as curseur:
+        curseur.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM reservations r
+            JOIN services s ON r.id_service = s.id_service
+            WHERE s.id_utilisateur = %s
+            """,
+            (id_proprietaire,)
+        )
+        res = curseur.fetchone()
+        return int(res["total"]) if res else 0
 
     

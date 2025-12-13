@@ -189,7 +189,7 @@ def edit_service(service_id):
                 abort(404)
 
             if s["id_utilisateur"] != session.get("id_utilisateur"):
-                flash("Vous n'êtes pas autorisé à modifier ce service.", "danger")
+                flash("Seul le propriétaire peut modifier ce service.", "danger")
                 abort(403)
                 
             cats = bd.get_categories(conn)
