@@ -86,15 +86,18 @@ def reserver_service(id_service):
 
         if service["id_utilisateur"] == id_utilisateur:
             flash("Vous ne pouvez pas réserver votre propre service.", "danger")
+            app.logger.error(f"Tentative de réservation de service ID={id_service} par son utilisateur={session['id_utilisateur']}")
             return redirect(url_for("service.service_detail", service_id=id_service))
 
         if bd.service_a_deja_ete_reserve(conn, id_service, date_reservation, date_souhaitee):
             flash("Ce service est déjà réservé à cette date et heure.", "warning")
+            app.logger.info(f"Tentative de réservation de service déjà réservé: ID={id_service} par utilisateur={session['id_utilisateur']}")
             return redirect(url_for("reservation.formulaire_reservation", id_service=id_service))
 
         cout = service.get("cout") or 0
         credit = bd.get_credit_utilisateur(conn, id_utilisateur)
         if cout > 0 and credit < cout:
+            app.logger.info(f"Tentative de réservation de service, avec crédit insufisant: ID={id_service} par utilisateur={session['id_utilisateur']}")
             flash(f"Crédit insuffisant. Il faut {cout} crédits, vous avez {credit}.", "danger")
             return redirect(url_for("reservation.formulaire_reservation", id_service=id_service))
 
@@ -104,6 +107,6 @@ def reserver_service(id_service):
             app.logger.error(f"Erreur réservation : {e}")
             flash("Une erreur est survenue lors de la réservation.", "danger")
             return redirect(url_for("reservation.formulaire_reservation", id_service=id_service))
-
+    app.logger.info(f"Réservation de service réussie: ID service={id_service} par utilisateur={session['id_utilisateur']}")
     flash("Réservation confirmée !", "success")
     return redirect(url_for("reservation.liste_reservations"), code=303)

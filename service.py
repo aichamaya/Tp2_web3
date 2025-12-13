@@ -20,6 +20,11 @@ def home():
             services = bd.get_service_all(conn)
             if not services:
              abort(400)
+        if "id_utilisateur" in session :
+            app.logger.info(f"Affichage des services dans la page d’accueil par l'utilisateur : {session.get('nom')} (ID: {session.get('id_utilisateur')})")
+        else :
+            app.logger.info("Affichage des services dans la page d’accueil par un utilisateur non authentifié.")
+        
         return render_template("services/home.jinja", services=services, locale=locale)
     except Exception :
         abort(500)
