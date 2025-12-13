@@ -297,6 +297,31 @@ function afficherResultats(resultats) {
 
     listeResultats.classList.remove("d-none");
 }
+function initReservationCheck() {
+  const form = document.getElementById("formReservation");
+  if (!form) return;
+
+  const idService = form.dataset.idService;
+  if (!idService) return;
+
+  const inputDate = document.getElementById("date");
+  const inputHeure = document.getElementById("heure");
+
+  const handler = () => {
+    
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => verifierDisponibilite(idService), 250);
+  };
+
+  inputDate?.addEventListener("input", handler);
+  inputHeure?.addEventListener("input", handler);
+
+  // état initial
+  handler();
+}
+
+window.addEventListener("load", initReservationCheck);
+
 
 function initialisation() {
 

@@ -79,7 +79,7 @@ def liste_utilisateurs_api():
 
     return jsonify(data)
 
-@bp_compte.route("api/verifier_courriel")
+@bp_compte.route("/api/verifier_courriel")
 def verifier_courriel():
     """vérifie si un courriel est saisi."""
     courriel = request.args.get("courriel", "").strip().lower()
@@ -112,11 +112,6 @@ def api_services():
 
 @bp_api.route("/api/reservations/disponibilite/<int:id_service>", methods=["GET"])
 def api_disponibilite_reservation(id_service: int):
-    """
-    Vérifie si un service est disponible pour une date + heure (AJAX).
-    GET ?date=YYYY-MM-DD&heure=HH:MM
-    Retour: { disponible: bool, message: str }
-    """
     date_str = (request.args.get("date") or "").strip()
     heure_str = (request.args.get("heure") or "").strip()
 
@@ -134,10 +129,9 @@ def api_disponibilite_reservation(id_service: int):
         if not service:
             return jsonify(disponible=False, message="Service introuvable."), 404
 
-        # IMPORTANT: doit matcher ta BD (DATE + TIME)
-        deja_reserve = bd.service_a_deja_ete_reserve(conn, id_service, date_obj, heure_obj)
+        deja = bd.service_a_deja_ete_reserve(conn, id_service, date_obj, heure_obj)
 
-    if deja_reserve:
-        return jsonify(disponible=False, message="⛔ Déjà réservé à cette date et heure."), 200
+    if deja:
+        return jsonify(disponible=False, message="Ce service est déjà réservé à cette date et heure."), 200
 
-    return jsonify(disponible=True, message="✅ Disponible."), 200
+    return jsonify(disponible=True, message="Disponible ✅"), 200

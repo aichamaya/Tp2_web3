@@ -7,11 +7,15 @@ from api import bp_api
 import os
 import logging
 import dotenv 
+from api import bp_api
+
+
 
 if not os.getenv('BD_UTILISATEUR'):
     dotenv.load_dotenv('.env')
 
 app = Flask(__name__)
+
 
 app.logger.setLevel(logging.DEBUG)
 app.config['CHEMIN_VERS_AJOUTS'] = os.path.join('static', 'images', 'ajouts')

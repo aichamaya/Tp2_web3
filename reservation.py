@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort, current_app as app
 from datetime import datetime
+from datetime import timedelta
 import bd
 
 bp_reservation = Blueprint("reservation", __name__)
@@ -16,6 +17,24 @@ def liste_reservations():
     with bd.creer_connexion() as conn:
         reservations_faites = bd.get_reservations_by_user(conn, id_utilisateur)
         reservations_recues = bd.get_reservations_for_owner(conn, id_utilisateur)
+
+    def formater_heure(val):
+        """Convertit TIME (timedelta) en HH:MM"""
+        if isinstance(val, timedelta):
+            total_minutes = val.seconds // 60
+            heures = total_minutes // 60
+            minutes = total_minutes % 60
+            return f"{heures:02d}:{minutes:02d}"
+        return ""
+
+    for r in reservations_faites + reservations_recues:
+        
+        r["date_reservation_formattee"] = (
+            r["date_reservation"].strftime("%d/%m/%Y")
+            if r.get("date_reservation") else ""
+        )
+
+        r["date_souhaitee_formattee"] = formater_heure(r.get("date_souhaitee"))
 
     return render_template(
         "reservation_list.jinja",
