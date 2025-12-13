@@ -106,24 +106,36 @@ def service_detail(service_id):
 
 @bp_service.route("/publish", methods=["GET", "POST"])
 def publish():
-    """Ajout d'un service ."""
- 
-    image_nom= ""
+    """Ajout d'un service."""
+
+    
+    if "id_utilisateur" not in session:
+        flash("Vous devez être connecté pour publier un service.", "warning")
+        return redirect(url_for("compte.connexion"))
+
+    image_nom = ""
     id_proprietaire = session["id_utilisateur"]
     locale = request.cookies.get("local", "fr_CA")
 
+   
     if request.method == "GET":
         with bd.creer_connexion() as conn:
             cats = bd.get_categories(conn)
-        return render_template("services/service_form.jinja", categories=cats, errors={}, form={}, locale=locale)
+        return render_template(
+            "services/service_form.jinja",
+            categories=cats,
+            errors={},
+            form={},
+            locale=locale
+        )
 
-    # Traitement du formulaire POST
+    
     titre = (request.form.get("titre") or "").strip()
     localisation = (request.form.get("localisation") or "").strip()
     description = (request.form.get("description") or "").strip()
     id_categorie = request.form.get("id_categorie", type=int)
     actif = 1 if (request.form.get("actif") or "1") == "1" else 0
-    photo = request.files.get('photo')
+    photo = request.files.get("photo")
 
     try:
         cout = float(request.form.get("cout") or 0)
@@ -131,20 +143,27 @@ def publish():
         cout = -1
 
     errors = {}
+
     if not (1 <= len(titre) <= 50):
         errors["titre"] = "Le titre est obligatoire (1 à 50 caractères)."
+
     if cout < 0:
         errors["cout"] = "Le coût doit être un nombre positif."
-    if photo and photo.filename != "":
-        if not photo.content_type.startswith('image/'):
-            errors["nom_image"] = "Veuillez selectionner une image"
-        else :
-            image_nom = enregistrer_image(photo)
 
+    
+    if not id_categorie:
+        errors["id_categorie"] = "Veuillez choisir une catégorie."
+
+    if photo and photo.filename:
+        if not (photo.content_type or "").startswith("image/"):
+            errors["photo"] = "Veuillez sélectionner un fichier image."
+        else:
+            image_nom = enregistrer_image(photo)
 
     if errors:
         with bd.creer_connexion() as conn:
             cats = bd.get_categories(conn)
+
         form = {
             "titre": titre,
             "localisation": localisation,
@@ -152,22 +171,39 @@ def publish():
             "id_categorie": id_categorie,
             "actif": str(actif),
             "cout": request.form.get("cout", ""),
-            'photo': image_nom
         }
-        return render_template("service_form.jinja", categories=cats, errors=errors, form=form, locale=locale), 400
+
+        return render_template(
+            "services/service_form.jinja",
+            categories=cats,
+            errors=errors,
+            form=form,
+            locale=locale
+        ), 400
 
     try:
         with bd.creer_connexion() as conn:
-            new_id = bd.ajout_service(conn, id_categorie, titre, description, localisation, actif, cout, id_proprietaire,image_nom)
+            new_id = bd.ajout_service(
+                conn,
+                id_categorie,
+                titre,
+                description,
+                localisation,
+                actif,
+                cout,
+                id_proprietaire,
+                image_nom
+            )
     except Exception as e:
-        print(f"Erreur lors de l'ajout de service: {e}")
+        app.logger.exception(f"Erreur lors de l'ajout de service: {e}")
         flash("Erreur lors de l'ajout du service en base de données.", "danger")
-        return redirect(url_for(".publish"))
+        return redirect(url_for("service.publish"))
 
     flash("Service ajouté avec succès.", "success")
-    app.logger.info(f"Ajout service ID={new_id} par utilisateur={session['id_utilisateur']}")
-    
-    return redirect(url_for(".service_detail", service_id=new_id), code=303)
+    app.logger.info(f"Ajout service ID={new_id} par utilisateur={id_proprietaire}")
+
+    return redirect(url_for("service.service_detail", service_id=new_id), code=303)
+
 
 @bp_service.route("/services/<int:service_id>/edit", methods=["GET", "POST"])
 def edit_service(service_id):
